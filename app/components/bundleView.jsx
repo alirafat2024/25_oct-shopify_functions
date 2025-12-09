@@ -1,4 +1,29 @@
+import { useState } from "react";
+import { ColorPickerField } from "./ColorPickerField";
+import { SelectField } from "./selectField";
 export default function BundleView() {
+  const [activeIndex, setActiveIndex] = useState([]);
+  const [giftSections, setGiftSections] = useState([]);
+  const [isGiftAdded, setIsGiftAdded] = useState(false);
+  const addGiftSection = () => {
+    const newGift = {
+      id: Math.random(),
+    };
+    setGiftSections([...giftSections, newGift]);
+    setIsGiftAdded(true);
+  };
+
+  const removeGiftSection = (id) => {
+    setGiftSections(giftSections.filter((gift) => gift.id !== id));
+  };
+
+  const handleToggle = (index) => {
+    if (activeIndex.includes(index)) {
+      setActiveIndex(activeIndex.filter((i) => i !== index));
+    } else {
+      setActiveIndex([...activeIndex, index]);
+    }
+  };
   return (
     <s-page>
       <s-stack direction="block" gap="base">
@@ -35,120 +60,372 @@ export default function BundleView() {
           >
             <s-grid-item gridColumn="span 4">
               <s-stack gap="small-300">
+                {/* Trigger */}
                 <s-section>
                   <s-stack gap="small-300">
-                    <s-stack direction="inline" gap="small-300">
+                    <s-stack
+                      direction="inline"
+                      gap="small-300"
+                      onClick={() => handleToggle(0)}
+                    >
                       <s-icon type="settings" />
                       <s-heading>Trigger</s-heading>
                       <s-icon type="chevron-down" />
                     </s-stack>
-
-                    <s-stack gap="base">
-                      <s-stack
-                        direction="inline"
-                        gap="small-300"
-                        justifyContent="center"
-                      >
-                        <s-box InlineSize="245px">
-                          <s-text-field label="Bundle name" />
-                          <s-text type="small">
-                            Customer wont see it,But it will be the
-                            discount/bundle name.
-                          </s-text>
-                        </s-box>
-                        <s-box InlineSize="245px">
-                          <s-text-field label="Bundle title" />
-                        </s-box>
-                      </s-stack>
-                      <s-stack gap="small-300">
+                    {activeIndex.includes(0) && (
+                      <s-stack gap="base">
                         <s-stack
                           direction="inline"
-                          gap="base"
-                          alignItems="center"
+                          gap="small-300"
+                          justifyContent="center"
                         >
-                          <s-box inlineSize="350px">
-                            <s-select label="Trigger">
-                              <s-option>specific collection</s-option>
-                              <s-option>specific products</s-option>
-                            </s-select>
+                          <s-box InlineSize="245px">
+                            <s-text-field label="Bundle name" />
+                            <s-text type="small">
+                              Customer wont see it,But it will be the
+                              discount/bundle name.
+                            </s-text>
                           </s-box>
-                          <s-box paddingBlockStart="base">
-                            <s-button>brows</s-button>
+                          <s-box InlineSize="245px">
+                            <s-text-field label="Bundle title" />
                           </s-box>
                         </s-stack>
-                        <s-box>
-                          <s-checkbox label="Show variant selection" />
-                        </s-box>
-                        <s-box>
-                          <s-checkbox defaultChecked label="Compare price" />
-                        </s-box>
+                        <s-stack gap="small-300">
+                          <s-stack
+                            direction="inline"
+                            gap="base"
+                            alignItems="center"
+                          >
+                            <s-box inlineSize="350px">
+                              <s-select label="Trigger">
+                                <s-option>specific collection</s-option>
+                                <s-option>specific products</s-option>
+                              </s-select>
+                            </s-box>
+                            <s-box paddingBlockStart="base">
+                              <s-button>brows</s-button>
+                            </s-box>
+                          </s-stack>
+                          <s-box>
+                            <s-checkbox label="Show variant selection" />
+                          </s-box>
+                          <s-box>
+                            <s-checkbox defaultChecked label="Compare price" />
+                          </s-box>
+                        </s-stack>
                       </s-stack>
-                    </s-stack>
+                    )}
                   </s-stack>
                 </s-section>
+                {/* Style*/}
                 <s-section>
                   <s-stack>
-                    <s-stack direction="inline" gap="small-300">
+                    <s-stack
+                      direction="inline"
+                      gap="small-300"
+                      onClick={() => {
+                        handleToggle(1);
+                      }}
+                    >
                       <s-icon type="paint-brush-flat" />
                       <s-heading>Style</s-heading>
                       <s-icon type="chevron-down" />
                     </s-stack>
+                    {activeIndex.includes(1) && (
+                      <s-stack gap="small-100">
+                        <s-stack gap="small-100">
+                          <s-stack
+                            direction="inline"
+                            alignItems="center"
+                            justifyContent="space-between"
+                          >
+                            <s-heading>alignment</s-heading>
+                            <s-stack direction="inline" gap="base">
+                              <s-box border="base">
+                                <s-image
+                                  aspectRatio="1"
+                                  src="/app/assets/vertical.svg"
+                                  objectFit="contain"
+                                />
+                              </s-box>
 
-                    <s-stack
-                      direction="inline"
-                      alignItems="center"
-                      justifyContent="space-between"
-                    >
-                      <s-heading>alignment</s-heading>
-                      <s-stack direction="inline">
-                        <s-box>
-                          <s-image
-                            aspectRatio="1/0.5"
-                            src="/app/assets/vertical.svg"
-                            objectFit="contain"
+                              <s-box border="base">
+                                <s-image
+                                  src="/app/assets/horizontal.svg"
+                                  aspectRatio="1"
+                                  objectFit="contain"
+                                />
+                              </s-box>
+                            </s-stack>
+                          </s-stack>
+                          <s-box>
+                            <s-text>Border Radius (8px)</s-text>
+                            <input
+                              style={{ width: "100%" }}
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                            ></input>
+                          </s-box>
+                          <s-box>
+                            <s-heading>General Colors</s-heading>
+                          </s-box>
+                          <s-stack direction="inline" gap="small-300">
+                            <ColorPickerField label={"Title"} />
+                            <ColorPickerField label={"Title Lines"} />
+                          </s-stack>
+                          <s-divider></s-divider>
+                        </s-stack>
+
+                        <s-stack gap="small-100">
+                          <s-heading>Card Colors</s-heading>
+                          <s-stack direction="inline" gap="small-300">
+                            <ColorPickerField label={"Card bg"} />
+                            <ColorPickerField label={"Selected Card bg"} />
+                            <ColorPickerField label={"Card Title"} />
+                            <ColorPickerField label={"Card Subtitle"} />
+                          </s-stack>
+                          <s-stack direction="inline" gap="small-300">
+                            <ColorPickerField label={"Price"} />
+                            <ColorPickerField label={"Compare Price"} />
+                            <ColorPickerField label={"Border"} />
+                          </s-stack>
+                          <s-divider></s-divider>
+                        </s-stack>
+
+                        <s-stack gap="small-100">
+                          <s-heading>Inside Badge Colors</s-heading>
+                          <s-stack direction="inline" gap="small-300">
+                            <ColorPickerField label={"Text"} />
+                            <ColorPickerField label={"Background"} />
+                            <s-divider />
+                          </s-stack>
+                        </s-stack>
+                        <s-stack gap="small-100">
+                          <s-heading>Upsell Colors</s-heading>
+                          <s-stack direction="inline" gap="small-300">
+                            <ColorPickerField label={"Background"} />
+                            <s-divider />
+                          </s-stack>
+                        </s-stack>
+
+                        <s-stack gap="small-100">
+                          <s-heading>Typography</s-heading>
+
+                          <s-stack gap="small-100">
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                              gap="base"
+                            >
+                              <SelectField label={"Main Title"} />
+                              <SelectField label={"Card Title"} />
+                            </s-stack>
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                              gap="base"
+                            >
+                              <SelectField label={"Card Subtitle"} />
+                              <SelectField label={"Inside Badge"} />
+                            </s-stack>
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                              gap="base"
+                            >
+                              <SelectField label={"Outside Badge"} />
+                              <SelectField label={"ATC Button"} />
+                            </s-stack>
+                          </s-stack>
+                          <s-divider />
+                        </s-stack>
+
+                        <s-stack gap="small-100">
+                          <s-stack
+                            direction="inline"
+                            justifyContent="space-between"
+                          >
+                            <s-box InlineSize="250px">
+                              <s-paragraph>Padding Y (0.6rem) </s-paragraph>
+                              <input
+                                style={{ width: "100%" }}
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="1"
+                              ></input>
+                            </s-box>
+                            <s-box InlineSize="250px">
+                              <s-paragraph>Border Radius (0.3rem) </s-paragraph>
+                              <input
+                                style={{ width: "100%" }}
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="1"
+                              ></input>
+                            </s-box>
+                          </s-stack>
+                          <s-box>
+                            <s-checkbox defaultChecked label="Full Width" />
+                          </s-box>
+                          <s-box>
+                            <s-text-area
+                              label="Custom CSS"
+                              value="*[id*='Quantity'],
+                                  *[id*='price-template'],
+                                  *[class*='product-form'] {
+                                    display: none;
+                                  }"
+                              rows={6}
+                            />
+                          </s-box>
+                        </s-stack>
+                      </s-stack>
+                    )}
+                  </s-stack>
+                </s-section>
+
+                <s-section>
+                  <s-stack gap="small-100">
+                    <s-stack direction="inline" justifyContent="space-between">
+                      <s-stack direction="inline" gap="small-300">
+                        <s-icon type="gift-card" />
+                        <s-heading>Progressive Gifts</s-heading>
+                        <s-icon type="chevron-down" />
+                      </s-stack>
+                      <s-switch />
+                    </s-stack>
+
+                    <s-stack gap="small-100">
+                      <s-stack
+                        direction="inline"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <s-heading>alignment</s-heading>
+                        <s-stack direction="inline" gap="base">
+                          <s-box border="base">
+                            <s-image
+                              aspectRatio="1"
+                              src="/app/assets/vertical.svg"
+                              objectFit="contain"
+                            />
+                          </s-box>
+
+                          <s-box border="base">
+                            <s-image
+                              src="/app/assets/horizontal.svg"
+                              aspectRatio="1"
+                              objectFit="contain"
+                            />
+                          </s-box>
+                        </s-stack>
+                      </s-stack>
+                      <s-stack
+                        direction="inline"
+                        justifyContent="space-between"
+                      >
+                        <s-box inlineSize="250px">
+                          <s-text-field
+                            label="Titel"
+                            value="Free gifts with your order"
                           />
                         </s-box>
-
-                        <s-box>
-                          <s-image
-                            src="/app/assets/horizontal.svg"
-                            aspectRatio="1/0.5"
-                            objectFit="contain"
+                        <s-box inlineSize="250px">
+                          <s-text-field
+                            label="Subtitle"
+                            value="Unlock selecting a higher bundle"
                           />
                         </s-box>
                       </s-stack>
+                      {!isGiftAdded && (
+                        <s-clickable
+                          border="base"
+                          padding="small-300"
+                          borderRadius="base"
+                          onClick={addGiftSection}
+                        >
+                          <s-stack
+                            direction="inline"
+                            gap="small-300"
+                            justifyContent="center"
+                          >
+                            <s-icon type="gift-card" />
+                            <s-text>Add Free Gift</s-text>
+                          </s-stack>
+                        </s-clickable>
+                      )}
+                      {giftSections.map((gift) => (
+                        <s-stack gap="small-100" key={gift.id}>
+                          <s-stack
+                            direction="inline"
+                            justifyContent="space-between"
+                          >
+                            <s-button icon="product">select product</s-button>
+                            <s-link onClick={() => removeGiftSection(gift.id)}>
+                              remove
+                            </s-link>
+                          </s-stack>
+
+                          <s-select label="unlock at">
+                            <s-option>Offer 1</s-option>
+                            <s-option>Offer 2</s-option>
+                            <s-option>Offer 3</s-option>
+                          </s-select>
+
+                          <s-stack
+                            direction="inline"
+                            justifyContent="space-between"
+                          >
+                            <s-box inlineSize="250px">
+                              <s-text-field label="Label" value="FREE" />
+                            </s-box>
+                            <s-box inlineSize="250px">
+                              <s-text-field
+                                label="Crossed Label"
+                                value="{{price}}"
+                              />
+                            </s-box>
+                          </s-stack>
+
+                          <s-stack
+                            direction="inline"
+                            justifyContent="space-between"
+                          >
+                            <s-box inlineSize="250px">
+                              <s-text-field label="Label" value="FREE" />
+                            </s-box>
+                            <s-box inlineSize="250px">
+                              <s-text-field
+                                label="Crossed Label"
+                                value="{{price}}"
+                              />
+                            </s-box>
+                          </s-stack>
+
+                          {!isGiftAdded && (
+                            <s-clickable
+                              border="base"
+                              padding="small-300"
+                              borderRadius="base"
+                              onClick={addGiftSection}
+                            >
+                              <s-stack
+                                direction="inline"
+                                gap="small-300"
+                                justifyContent="center"
+                              >
+                                <s-icon type="gift-card" />
+                                <s-text>Add Free Gift</s-text>
+                              </s-stack>
+                            </s-clickable>
+                          )}
+                        </s-stack>
+                      ))}
                     </s-stack>
-                    <s-box>
-                      <input
-                        style={{ width: "100%" }}
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="1"
-                      ></input>
-                    </s-box>
-                    <s-box>
-                      <s-heading>General Colors</s-heading>
-                    </s-box>
-                    <s-stack direction="inline" gap="base">
-                      <s-box inlineSize="100px">
-                        <s-select label="Titel">
-                          <s-color-field value="#FF0000"/>
-                        </s-select>
-                      </s-box>
-                      <s-box>
-                        <s-select label="Title Lines">
-                          <s-color-field />
-                        </s-select>
-                      </s-box>
-                    </s-stack>
-                  </s-stack>
-                </s-section>
-                <s-section>
-                  <s-stack direction="inline" gap="small-300">
-                    <s-icon type="gift-card" />
-                    <s-heading>Progressive Gifts</s-heading>
-                    <s-icon type="chevron-down" />
                   </s-stack>
                 </s-section>
                 <s-section>
