@@ -6,7 +6,7 @@ export default function AppIndexView() {
     <s-stack>
       <s-stack direction="inline" justifyContent="space-between">
         <s-heading>Bundle Deals</s-heading>
-        <s-button variant="primary" onClick={navigate("app/bundles")}>
+        <s-button variant="primary"    onClick={() => navigate("/app/bundles")}>
           Create bundle
         </s-button>
       </s-stack>
@@ -76,7 +76,7 @@ export default function AppIndexView() {
                 <s-button
                   slot="primary-action"
                   variant="primary"
-                  onClick={navigate("app/bundles")}
+                     onClick={() => navigate("/app/bundles")}
                 >
                   {" "}
                   Add Bundle{" "}

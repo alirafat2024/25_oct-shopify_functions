@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { ColorPickerField } from "./ColorPickerField";
 import { SelectField } from "./selectField";
+import { Offers } from "./offers";
 export default function BundleView() {
   const [activeIndex, setActiveIndex] = useState([]);
   const [giftSections, setGiftSections] = useState([]);
-  const [isGiftAdded, setIsGiftAdded] = useState(false);
+  const [offerSections, setOfferSections] = useState([]);
+
+  const addOfferSection = () => {
+    const newOffer = { id: Math.random() };
+    setOfferSections([...offerSections, newOffer]);
+  };
+
+  const removeOfferSection = (id) => {
+    setOfferSections(offerSections.filter((addSection) => addSection.id !== id));
+  };
+
   const addGiftSection = () => {
-    const newGift = {
-      id: Math.random(),
-    };
+    const newGift = { id: Math.random() };
     setGiftSections([...giftSections, newGift]);
-    setIsGiftAdded(true);
   };
 
   const removeGiftSection = (id) => {
@@ -287,10 +295,14 @@ export default function BundleView() {
                     )}
                   </s-stack>
                 </s-section>
-
+                {/* Progressive Gifts */}
                 <s-section>
                   <s-stack gap="small-100">
-                    <s-stack direction="inline" justifyContent="space-between">
+                    <s-stack
+                      direction="inline"
+                      justifyContent="space-between"
+                      onClick={() => handleToggle(2)}
+                    >
                       <s-stack direction="inline" gap="small-300">
                         <s-icon type="gift-card" />
                         <s-heading>Progressive Gifts</s-heading>
@@ -298,50 +310,102 @@ export default function BundleView() {
                       </s-stack>
                       <s-switch />
                     </s-stack>
+                    {activeIndex.includes(2) && (
+                      <s-stack gap="small-100">
+                        <s-stack
+                          direction="inline"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <s-heading>alignment</s-heading>
+                          <s-stack direction="inline" gap="base">
+                            <s-box border="base">
+                              <s-image
+                                aspectRatio="1"
+                                src="/app/assets/vertical.svg"
+                                objectFit="contain"
+                              />
+                            </s-box>
 
-                    <s-stack gap="small-100">
-                      <s-stack
-                        direction="inline"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <s-heading>alignment</s-heading>
-                        <s-stack direction="inline" gap="base">
-                          <s-box border="base">
-                            <s-image
-                              aspectRatio="1"
-                              src="/app/assets/vertical.svg"
-                              objectFit="contain"
+                            <s-box border="base">
+                              <s-image
+                                src="/app/assets/horizontal.svg"
+                                aspectRatio="1"
+                                objectFit="contain"
+                              />
+                            </s-box>
+                          </s-stack>
+                        </s-stack>
+                        <s-stack
+                          direction="inline"
+                          justifyContent="space-between"
+                        >
+                          <s-box inlineSize="250px">
+                            <s-text-field
+                              label="Titel"
+                              value="Free gifts with your order"
                             />
                           </s-box>
-
-                          <s-box border="base">
-                            <s-image
-                              src="/app/assets/horizontal.svg"
-                              aspectRatio="1"
-                              objectFit="contain"
+                          <s-box inlineSize="250px">
+                            <s-text-field
+                              label="Subtitle"
+                              value="Unlock selecting a higher bundle"
                             />
                           </s-box>
                         </s-stack>
-                      </s-stack>
-                      <s-stack
-                        direction="inline"
-                        justifyContent="space-between"
-                      >
-                        <s-box inlineSize="250px">
-                          <s-text-field
-                            label="Titel"
-                            value="Free gifts with your order"
-                          />
-                        </s-box>
-                        <s-box inlineSize="250px">
-                          <s-text-field
-                            label="Subtitle"
-                            value="Unlock selecting a higher bundle"
-                          />
-                        </s-box>
-                      </s-stack>
-                      {!isGiftAdded && (
+
+                        {giftSections.map((gift) => (
+                          <s-stack gap="small-100" key={gift.id}>
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                            >
+                              <s-button icon="product">select product</s-button>
+                              <s-link
+                                onClick={() => removeGiftSection(gift.id)}
+                              >
+                                remove
+                              </s-link>
+                            </s-stack>
+
+                            <s-select label="unlock at">
+                              <s-option>Offer 1</s-option>
+                              <s-option>Offer 2</s-option>
+                              <s-option>Offer 3</s-option>
+                            </s-select>
+
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                            >
+                              <s-box inlineSize="250px">
+                                <s-text-field label="Label" value="FREE" />
+                              </s-box>
+                              <s-box inlineSize="250px">
+                                <s-text-field
+                                  label="Crossed Label"
+                                  value="{{price}}"
+                                />
+                              </s-box>
+                            </s-stack>
+
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                            >
+                              <s-box inlineSize="250px">
+                                <s-text-field label="Label" value="FREE" />
+                              </s-box>
+                              <s-box inlineSize="250px">
+                                <s-text-field
+                                  label="Crossed Label"
+                                  value="{{price}}"
+                                />
+                              </s-box>
+                            </s-stack>
+                          </s-stack>
+                        ))}
+
                         <s-clickable
                           border="base"
                           padding="small-300"
@@ -357,98 +421,50 @@ export default function BundleView() {
                             <s-text>Add Free Gift</s-text>
                           </s-stack>
                         </s-clickable>
-                      )}
-                      {giftSections.map((gift) => (
-                        <s-stack gap="small-100" key={gift.id}>
-                          <s-stack
-                            direction="inline"
-                            justifyContent="space-between"
-                          >
-                            <s-button icon="product">select product</s-button>
-                            <s-link onClick={() => removeGiftSection(gift.id)}>
-                              remove
-                            </s-link>
-                          </s-stack>
-
-                          <s-select label="unlock at">
-                            <s-option>Offer 1</s-option>
-                            <s-option>Offer 2</s-option>
-                            <s-option>Offer 3</s-option>
-                          </s-select>
-
-                          <s-stack
-                            direction="inline"
-                            justifyContent="space-between"
-                          >
-                            <s-box inlineSize="250px">
-                              <s-text-field label="Label" value="FREE" />
-                            </s-box>
-                            <s-box inlineSize="250px">
-                              <s-text-field
-                                label="Crossed Label"
-                                value="{{price}}"
-                              />
-                            </s-box>
-                          </s-stack>
-
-                          <s-stack
-                            direction="inline"
-                            justifyContent="space-between"
-                          >
-                            <s-box inlineSize="250px">
-                              <s-text-field label="Label" value="FREE" />
-                            </s-box>
-                            <s-box inlineSize="250px">
-                              <s-text-field
-                                label="Crossed Label"
-                                value="{{price}}"
-                              />
-                            </s-box>
-                          </s-stack>
-
-                          {!isGiftAdded && (
-                            <s-clickable
-                              border="base"
-                              padding="small-300"
-                              borderRadius="base"
-                              onClick={addGiftSection}
-                            >
-                              <s-stack
-                                direction="inline"
-                                gap="small-300"
-                                justifyContent="center"
-                              >
-                                <s-icon type="gift-card" />
-                                <s-text>Add Free Gift</s-text>
-                              </s-stack>
-                            </s-clickable>
-                          )}
-                        </s-stack>
-                      ))}
+                      </s-stack>
+                    )}
+                  </s-stack>
+                </s-section>
+                {offerSections.map((addSection) => (
+                <s-section key={addSection}>
+                  <s-stack gap="base">
+                    <s-stack direction="inline" justifyContent="space-between">
+                      <s-stack direction="inline" gap="small-300">
+                        <s-icon type="discount-code" />
+                        <s-heading>Offer 1</s-heading>
+                        <s-icon type="chevron-down" />
+                      </s-stack>
+                      <s-stack direction="inline">
+                        <s-icon type="arrow-up" />
+                        <s-icon type="arrow-down" />
+                        <s-icon type="duplicate" />
+                        <s-icon type="delete" 
+                        onClick={() => removeOfferSection(addSection.id)}
+                        
+                        />
+                      </s-stack>
                     </s-stack>
+                    <Offers />
                   </s-stack>
                 </s-section>
-                <s-section>
-                  <s-stack direction="inline" gap="small-300">
-                    <s-icon type="discount-code" />
-                    <s-heading>Offer 1</s-heading>
-                    <s-icon type="chevron-down" />
+                ))}
+
+                <s-clickable
+                  border="base"
+                  padding="base"
+                  background="subdued"
+                  borderRadius="base"
+                  onClick={addOfferSection}
+                >
+                  <s-stack
+                    direction="inline"
+                    gap="small-300"
+                    justifyContent="center"
+                  >
+                    <s-icon type="plus-circle" />
+                    <s-text>Add Offer</s-text>
                   </s-stack>
-                </s-section>
-                <s-section>
-                  <s-stack direction="inline" gap="small-300">
-                    <s-icon type="discount-code" />
-                    <s-heading>Offer 2</s-heading>
-                    <s-icon type="chevron-down" />
-                  </s-stack>
-                </s-section>
-                <s-section>
-                  <s-stack direction="inline" gap="small-300">
-                    <s-icon type="discount-code" />
-                    <s-heading>Offer 3</s-heading>
-                    <s-icon type="chevron-down" />
-                  </s-stack>
-                </s-section>
+                </s-clickable>
               </s-stack>
             </s-grid-item>
             <s-grid-item gridColumn="span 3">

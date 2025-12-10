@@ -1,10 +1,16 @@
-export const SelectField = ({label}) => {
+export const SelectField = ({ label }) => {
   return (
     <s-stack>
       <s-heading>{label}</s-heading>
       <s-stack direction="inline" gap="small-300">
         <s-box maxInlineSize="110px">
-          <s-text-field label="Font Size (px)"></s-text-field>
+          <s-number-field
+            label="Font Size (px)"
+            placeholder="0"
+            step={1}
+            min={0}
+            max={100}
+          />
         </s-box>
         <s-box maxInlineSize="110px">
           <s-select label="Font Style ">
