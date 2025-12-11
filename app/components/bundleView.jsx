@@ -2,10 +2,45 @@ import { useState } from "react";
 import { ColorPickerField } from "./ColorPickerField";
 import { SelectField } from "./selectField";
 import { Offers } from "./offers";
+import { FiBox } from "react-icons/fi";
 export default function BundleView() {
   const [activeIndex, setActiveIndex] = useState([]);
   const [giftSections, setGiftSections] = useState([]);
   const [offerSections, setOfferSections] = useState([]);
+  const [showVariantSelection, setShowVariantSelection] = useState(false);
+  const [showVariantImag, setShowVariantImg] = useState(false);
+  const [variantImagSizeValue, setVariantImagSizeValue] = useState(5);
+  const [variantImagRadiusValue, setVariantImagRadiusValue] = useState(5);
+  const [comparePrice, setComparePrice] = useState(false);
+  const [products, setProducts] = useState([]);
+
+  const handleProduct = async () => {
+    const selected = await shopify.resourcePicker({
+      type: "product",
+      multiple: true,
+    });
+    setProducts(selected);
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    console.log(selected);
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+  };
+  const removeProduct = (productId) => {
+    setProducts((prevProducts) =>
+      prevProducts.filter((product) => product.id !== productId),
+    );
+  };
+
+  const handleComparePrice = () => {
+    setComparePrice(!comparePrice);
+  };
+
+  const handleVariantCheckboxChange = () => {
+    setShowVariantSelection(!showVariantSelection);
+  };
+
+  const handleShowVariantImg = () => {
+    setShowVariantImg(!showVariantImag);
+  };
 
   const addOfferSection = () => {
     const newOffer = { id: Math.random() };
@@ -13,7 +48,9 @@ export default function BundleView() {
   };
 
   const removeOfferSection = (id) => {
-    setOfferSections(offerSections.filter((addSection) => addSection.id !== id));
+    setOfferSections(
+      offerSections.filter((addSection) => addSection.id !== id),
+    );
   };
 
   const addGiftSection = () => {
@@ -111,14 +148,128 @@ export default function BundleView() {
                               </s-select>
                             </s-box>
                             <s-box paddingBlockStart="base">
-                              <s-button>brows</s-button>
+                              <s-button onClick={handleProduct}>brows</s-button>
                             </s-box>
                           </s-stack>
+                          {products.length > 0 && (
+                            <s-stack
+                              border="base"
+                              borderRadius="base"
+                              padding="base"
+                              justifyContent="space-between"
+                              direction="inline"
+                             >
+                              <s-stack>
+                                <s-stack gap="small">
+                                  {products.map((product) => (
+                                    <s-stack
+                                      key={product.id}
+                                      direction="inline"
+                                      gap="base"
+                                     >
+                                      <s-box inlineSize="50px" blockSize="50px">
+                                        <s-image
+                                          src={
+                                            product.images && product.images[0]
+                                              ? product.images[0].originalSrc
+                                              : ""
+                                          }
+                                          alt={product.title}
+                                          aspectRatio="1/0.5"
+                                          objectFit="cover"
+                                        />
+                                      </s-box>
+                                      <s-box>
+                                        <s-text>{product.title}</s-text>
+                                        <s-paragraph>
+                                          {product.publishedAt}
+                                        </s-paragraph>
+                                      </s-box>
+                                    </s-stack>
+
+                                    
+                                  ))}
+                                </s-stack>
+                              </s-stack>
+                              <s-box>
+                                <s-icon type="x" 
+                                onClick={() => removeProduct(product.id)}
+                                
+                                />
+                              </s-box>
+                            </s-stack>
+                          )}
                           <s-box>
-                            <s-checkbox label="Show variant selection" />
+                            <s-checkbox
+                              checked={showVariantSelection}
+                              onChange={handleVariantCheckboxChange}
+                              label="Show variant selection"
+                            />
                           </s-box>
+                          {showVariantSelection && (
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                              alignItems="center"
+                            >
+                              <s-box>
+                                <s-checkbox
+                                  label="Display variant image"
+                                  checked={showVariantImag}
+                                  onChange={handleShowVariantImg}
+                                />
+                              </s-box>
+
+                              {showVariantImag && (
+                                <s-stack
+                                  direction="inline"
+                                  justifyContent="space-between"
+                                >
+                                  <s-box InlineSize="170px">
+                                    <s-text>
+                                      Size ({variantImagSizeValue}px)
+                                    </s-text>
+                                    <input
+                                      style={{ width: "100%" }}
+                                      type="range"
+                                      min="0"
+                                      max="100"
+                                      step="1"
+                                      value={variantImagSizeValue}
+                                      onChange={(e) => {
+                                        setVariantImagSizeValue(e.target.value);
+                                      }}
+                                    />
+                                  </s-box>
+                                  <s-box inlineSize="170px">
+                                    <s-text>
+                                      Radius ({variantImagRadiusValue}px)
+                                    </s-text>
+                                    <input
+                                      style={{ width: "100%" }}
+                                      type="range"
+                                      min="0"
+                                      max="100"
+                                      step="1"
+                                      value={variantImagRadiusValue}
+                                      onChange={(e) => {
+                                        setVariantImagRadiusValue(
+                                          e.target.value,
+                                        );
+                                      }}
+                                    />
+                                  </s-box>
+                                </s-stack>
+                              )}
+                            </s-stack>
+                          )}
+
                           <s-box>
-                            <s-checkbox defaultChecked label="Compare price" />
+                            <s-checkbox
+                              label="Compare price"
+                              checked={comparePrice}
+                              onChange={handleComparePrice}
+                            />
                           </s-box>
                         </s-stack>
                       </s-stack>
@@ -425,28 +576,39 @@ export default function BundleView() {
                     )}
                   </s-stack>
                 </s-section>
-                {offerSections.map((addSection) => (
-                <s-section key={addSection}>
-                  <s-stack gap="base">
-                    <s-stack direction="inline" justifyContent="space-between">
-                      <s-stack direction="inline" gap="small-300">
-                        <s-icon type="discount-code" />
-                        <s-heading>Offer 1</s-heading>
-                        <s-icon type="chevron-down" />
+                {offerSections.map((addSection, index) => (
+                  <s-section key={addSection}>
+                    <s-stack gap="base">
+                      <s-stack
+                        direction="inline"
+                        justifyContent="space-between"
+                        onClick={() => handleToggle(addSection.id)}
+                      >
+                        <s-stack direction="inline" gap="small-300">
+                          <s-icon type="discount-code" />
+                          <s-heading>{`Offer ${index + 1}`}</s-heading>
+                          <s-icon type="chevron-down" />
+                        </s-stack>
+                        <s-stack direction="inline">
+                          <s-icon type="arrow-up" />
+                          <s-icon type="arrow-down" />
+                          <s-icon
+                            type="duplicate"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addOfferSection();
+                            }}
+                          />
+                          <s-icon
+                            type="delete"
+                            onClick={() => removeOfferSection(addSection.id)}
+                          />
+                        </s-stack>
                       </s-stack>
-                      <s-stack direction="inline">
-                        <s-icon type="arrow-up" />
-                        <s-icon type="arrow-down" />
-                        <s-icon type="duplicate" />
-                        <s-icon type="delete" 
-                        onClick={() => removeOfferSection(addSection.id)}
-                        
-                        />
-                      </s-stack>
+
+                      {activeIndex.includes(addSection.id) && <Offers />}
                     </s-stack>
-                    <Offers />
-                  </s-stack>
-                </s-section>
+                  </s-section>
                 ))}
 
                 <s-clickable
@@ -469,123 +631,187 @@ export default function BundleView() {
             </s-grid-item>
             <s-grid-item gridColumn="span 3">
               <s-section>
-                <s-stack gap="base">
-                  <s-clickable
-                    border="base"
-                    padding="base"
-                    background="subdued"
-                    borderRadius="base"
+                <s-stack gap="small-100">
+                  <s-stack
+                    direction="inline"
+                    justifyContent="space-between"
+                    alignItems="center"
                   >
-                    View Shipping Settings
-                  </s-clickable>
-                  <s-heading>Bundle & Save</s-heading>
-                  <s-stack gap="small-100">
                     <s-stack
-                      border="base"
                       direction="inline"
-                      justifyContent="space-between"
-                      borderRadius="base"
-                      padding="base"
+                      gap="small-300"
+                      alignItems="center"
                     >
-                      <s-stack
-                        direction="inline"
-                        gap="base"
-                        alignItems="center"
-                      >
-                        <s-stack>
-                          <s-choice-list>
-                            <s-choice value="optional"></s-choice>
-                          </s-choice-list>
-                        </s-stack>
-                        <s-stack>
-                          <s-heading>Buy 1</s-heading>
-                          <s-text>Regular price</s-text>
-                        </s-stack>
-                      </s-stack>
-                      <s-stack>
-                        <h2>$10.00</h2>
-                      </s-stack>
+                      <s-icon type="external" />
+                      <s-link>Preview</s-link>
                     </s-stack>
-                    <s-stack
-                      border="base"
-                      direction="inline"
-                      justifyContent="space-between"
-                      borderRadius="base"
-                      padding="base"
-                    >
-                      <s-stack
-                        direction="inline"
-                        gap="base"
-                        alignItems="center"
-                      >
-                        <s-stack>
-                          <s-choice-list>
-                            <s-choice value="optional"></s-choice>
-                          </s-choice-list>
-                        </s-stack>
-                        <s-stack>
-                          <s-stack
-                            direction="inline"
-                            gap="small-300"
-                            alignItems="center"
-                          >
-                            <s-heading>Buy 2</s-heading>
-                            <s-box>
-                              <s-button
-                                variant="primary"
-                                borderRadius="large-500"
-                              >
-                                Best Offer
-                              </s-button>
-                            </s-box>
-                          </s-stack>
-                          <s-text>5% OFF</s-text>
-                        </s-stack>
-                      </s-stack>
-                      <s-stack>
-                        <h2>$19.00</h2>
-                      </s-stack>
-                    </s-stack>
-                    <s-stack
-                      border="base"
-                      direction="inline"
-                      justifyContent="space-between"
-                      borderRadius="base"
-                      padding="base"
-                    >
-                      <s-stack
-                        direction="inline"
-                        gap="base"
-                        alignItems="center"
-                      >
-                        <s-stack>
-                          <s-choice-list>
-                            <s-choice value="optional"></s-choice>
-                          </s-choice-list>
-                        </s-stack>
-                        <s-stack>
-                          <s-stack
-                            direction="inline"
-                            gap="small-300"
-                            alignItems="center"
-                          >
-                            <s-heading>Buy 3</s-heading>
-                            <s-box borderRadius="large-100">
-                              <s-button variant="primary">
-                                $20 discount
-                              </s-button>
-                            </s-box>
-                          </s-stack>
-                          <s-text>$10 OFF</s-text>
-                        </s-stack>
-                      </s-stack>
-                      <s-stack>
-                        <h2>$0.00</h2>
-                      </s-stack>
-                    </s-stack>
+                    <s-box>
+                      <s-button disabled>Run A/B test</s-button>
+                    </s-box>
                   </s-stack>
-                  <s-stack justifyContent="center" alignItems="center">
-                    <s-button variant="primary">Add To Cart</s-button>
+
+                  <s-stack gap="base">
+                    <s-clickable
+                      border="base"
+                      padding="base"
+                      background="subdued"
+                      borderRadius="base"
+                    >
+                      <s-stack
+                        direction="inline"
+                        justifyContent="space-between"
+                      >
+                        <s-box inlineSize="160px">
+                          <s-select label="Product previewing">
+                            <s-option>Gift Card</s-option>
+                          </s-select>
+                        </s-box>
+                        <s-box inlineSize="160px">
+                          <s-select label="Country previewing">
+                            <s-option>Afghanistan </s-option>
+                          </s-select>
+                        </s-box>
+                      </s-stack>
+                    </s-clickable>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <div
+                        style={{
+                          flexGrow: 1,
+                          height: "1px",
+                          backgroundColor: "black",
+                          marginRight: "10px",
+                        }}
+                      ></div>
+
+                      <h4 style={{ margin: "0" }}>Bundle & Save</h4>
+
+                      <div
+                        style={{
+                          flexGrow: 1,
+                          height: "1px",
+                          backgroundColor: "black",
+                          marginLeft: "10px",
+                        }}
+                      ></div>
+                    </div>
+
+                    <s-stack gap="small-100">
+                      <s-stack border="base" borderRadius="base" padding="base">
+                        <s-stack
+                          direction="inline"
+                          justifyContent="space-between"
+                        >
+                          <s-stack
+                            direction="inline"
+                            gap="base"
+                            alignItems="center"
+                          >
+                            <s-stack>
+                              <s-choice-list>
+                                <s-choice value="optional"></s-choice>
+                              </s-choice-list>
+                            </s-stack>
+                            <s-stack>
+                              <s-stack
+                                direction="inline"
+                                gap="small-300"
+                                alignItems="center"
+                              >
+                                <s-heading>Buy 2</s-heading>
+                                <s-box>
+                                  <s-button
+                                    variant="primary"
+                                    borderRadius="large-500"
+                                  >
+                                    Best Offer
+                                  </s-button>
+                                </s-box>
+                              </s-stack>
+                              <s-text>5% OFF</s-text>
+                            </s-stack>
+                          </s-stack>
+                          <s-stack>
+                            <s-stack
+                              alignItems="center"
+                              justifyContent="center"
+                            >
+                              <h2>$19.00</h2>
+                              {comparePrice && (
+                                <s-text type="redundant">$20.00</s-text>
+                              )}
+                            </s-stack>
+                          </s-stack>
+                        </s-stack>
+
+                        <s-stack
+                          direction="inline"
+                          gap="small-300"
+                          alignItems="center"
+                        >
+                          <s-box>
+                            <s-button variant="primary">#1</s-button>
+                          </s-box>
+
+                          <div
+                            style={{
+                              color: "gray",
+                              backgroundColor: "rgba(241, 241, 241, 1)",
+                              padding: `${variantImagSizeValue}px`,
+                              margin: "0px",
+                              borderRadius: `${variantImagRadiusValue}px`,
+                            }}
+                          >
+                            <FiBox style={{ width: "20px", height: "20px" }} />
+                          </div>
+
+                          <s-box inlineSize="100px">
+                            <s-select>
+                              <s-option>$10</s-option>
+                              <s-option>$25</s-option>
+                              <s-option>$50</s-option>
+                              <s-option>$100</s-option>
+                            </s-select>
+                          </s-box>
+                        </s-stack>
+                        <s-stack>{/* later */}</s-stack>
+                      </s-stack>
+                    </s-stack>
+                    {/* OR */}
+                    <s-stack
+                      border="base"
+                      padding="base"
+                      borderRadius="base"
+                      direction="block"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <s-box>
+                        <s-choice-list>
+                          <s-choice value="optional"></s-choice>
+                        </s-choice-list>
+                      </s-box>
+                      <h3 style={{ padding: "0px", margin: "0px" }}>Buy3</h3>
+                      <s-box>
+                        <s-button variant="primary">Best Offer</s-button>
+                      </s-box>
+
+                      <p style={{ padding: "0px", margin: "0px" }}>5% OFF</p>
+                      <p style={{ padding: "0px", margin: "0px" }}>
+                        <b>$19.00</b>
+                      </p>
+                      <p style={{ padding: "0px", margin: "0px" }}>$20.00</p>
+                    </s-stack>
+                    <s-stack justifyContent="center" alignItems="center">
+                      <s-button variant="primary">Add To Cart</s-button>
+                    </s-stack>
                   </s-stack>
                 </s-stack>
               </s-section>
