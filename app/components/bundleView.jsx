@@ -4,6 +4,82 @@ import { SelectField } from "./selectField";
 import { Offers } from "./offers";
 import { FiBox } from "react-icons/fi";
 export default function BundleView() {
+  //////////Progressive Gifts/////////////////
+  const [giftSections, setGiftSections] = useState([]);
+  const [textField1, setTextField1] = useState("🎁 Free gifts with your order");
+  const [textField2, setTextField2] = useState(
+    "Unlock selecting a higher bundle",
+  );
+  const [switchState, setSwitchState] = useState(false);
+
+  const [giftTitle, setGiftTitle] = useState();
+  const [giftPrice, setGiftPrice] = useState("$10.00");
+  const [giftType, setGiftType] = useState("FREE");
+  const [giftLock, setGiftLock] = useState("Lock");
+  const [selectedGiftImage, setSelectedGiftImage] = useState("horizontal");
+
+  const handleGiftImageSelect = (image) => {
+    setSelectedGiftImage(image);
+  };
+
+  const handleSwitchChange = () => {
+    setSwitchState(!switchState);
+  };
+
+  const handleGiftProduct = async (giftSectionId) => {
+    const selected = await shopify.resourcePicker({
+      type: "product",
+      multiple: true,
+    });
+
+    setGiftSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === giftSectionId
+          ? { ...section, giftProducts: selected }
+          : section,
+      ),
+    );
+  };
+
+  const removeGiftProduct = (productId, giftSectionId) => {
+    setGiftSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === giftSectionId
+          ? {
+              ...section,
+              giftProducts: section.giftProducts.filter(
+                (product) => product.id !== productId,
+              ),
+            }
+          : section,
+      ),
+    );
+  };
+
+  const addGiftSection = () => {
+    const newGift = {
+      id: Math.random(),
+      giftType: "FREE",
+      giftPrice: "$10.00",
+      giftLock: "Lock",
+      giftProducts: [],
+    };
+    setGiftSections([...giftSections, newGift]);
+  };
+  const removeGiftSection = (id) => {
+    setGiftSections(giftSections.filter((gift) => gift.id !== id));
+  };
+
+  const updateGiftSectionField = (value, field, giftSectionId) => {
+    setGiftSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === giftSectionId
+          ? { ...section, [field]: value } 
+          : section,
+      ),
+    );
+  };
+  //////////////////////////////////////////
   // Card Colors
   const [titleColor, setTitleColor] = useState("#000000");
   const [lineleColor, setLineColor] = useState("#AAF0FB");
@@ -17,7 +93,14 @@ export default function BundleView() {
   //  Inside Badge Colors
   const [textColor, setTextColor] = useState("#FFFFFF");
   const [backgroundColor, setBackgroundColor] = useState("#000000");
+  ///////////////button//////////////////
 
+  const [atcButtonBackgroundColor, setAtcButtonBackgroundColor] =
+    useState("#000000");
+  const [atcButtonTextColor, setAtcButtonTextColor] = useState("#FFFFFF");
+  const [paddingButton, setPaddingButton] = useState(10);
+  const [borderRadiusButton, setBorderRadiusButton] = useState(10);
+  ///////////////////////////////////////////////
   //  Outside Badge Colors
   const [outsideTextColor, setOutsideTextColor] = useState("#747474");
   const [outsideBackgroundColor, setOutsideBackgroundColor] =
@@ -25,18 +108,31 @@ export default function BundleView() {
   const [upsellBackgroundColor, setUpsellBackgroundColor] = useState("#E5E7EB");
   ////////////////////////////////////////////////////////////////////////////
   const [fontSettings, setFontSettings] = useState({
-    mainTitle: { fontSize: 16, fontStyle: "400" },
-    cardTitle: { fontSize: 12, fontStyle: "400" },
-    cardSubtitle: { fontSize: 10, fontStyle: "400" },
-    insideBadge: { fontSize: 10, fontStyle: "400" },
-    outsideBadge: { fontSize: 10, fontStyle: "400" },
-    atcButton: { fontSize: 10, fontStyle: "400" },
+    mainTitle: { fontSize: 24, fontStyle: "700" },
+    cardTitle: { fontSize: 19.2, fontStyle: "500" },
+    cardSubtitle: { fontSize: 16, fontStyle: "400" },
+    insideBadge: { fontSize: 14, fontStyle: "400" },
+    outsideBadge: { fontSize: 14, fontStyle: "400" },
+    atcButton: { fontSize: 16, fontStyle: "400" },
   });
 
-  const handleFontChange = (field, value, type) => {
+  const handleFontSizeChange = (field, value) => {
     setFontSettings((prevSettings) => ({
       ...prevSettings,
-      [field]: { ...prevSettings[field], [type]: value },
+      [field]: { ...prevSettings[field], fontSize: value },
+    }));
+  };
+
+  const handleFontStyleChange = (field, value) => {
+    const [fontWeight, italic] = value.split("-");
+
+    setFontSettings((prevSettings) => ({
+      ...prevSettings,
+      [field]: {
+        ...prevSettings[field],
+        fontStyle: fontWeight,
+        italic: italic || "",
+      },
     }));
   };
 
@@ -44,7 +140,7 @@ export default function BundleView() {
   const [devBorder, setDevBorder] = useState(5);
   const [selectedImage, setSelectedImage] = useState("horizontal");
   const [activeIndex, setActiveIndex] = useState([]);
-  const [giftSections, setGiftSections] = useState([]);
+
   const [offerSections, setOfferSections] = useState([]);
   const [showVariantSelection, setShowVariantSelection] = useState(false);
   const [showVariantImag, setShowVariantImg] = useState(false);
@@ -94,15 +190,6 @@ export default function BundleView() {
     setOfferSections(
       offerSections.filter((addSection) => addSection.id !== id),
     );
-  };
-
-  const addGiftSection = () => {
-    const newGift = { id: Math.random() };
-    setGiftSections([...giftSections, newGift]);
-  };
-
-  const removeGiftSection = (id) => {
-    setGiftSections(giftSections.filter((gift) => gift.id !== id));
   };
 
   const handleToggle = (index) => {
@@ -499,26 +586,19 @@ export default function BundleView() {
                           <s-stack gap="small-100">
                             <s-stack
                               direction="inline"
-                              justifyContent="space-between"
-                              gap="base"
+                              gap="large-500"
+                              justifyContent="start"
+                              alignItems="center"
                             >
                               <SelectField
                                 label={"Main Title"}
                                 fontSize={fontSettings.mainTitle.fontSize}
                                 fontStyle={fontSettings.mainTitle.fontStyle}
                                 OnChangeFontSize={(value) =>
-                                  handleFontChange(
-                                    "mainTitle",
-                                    value,
-                                    "fontSize",
-                                  )
+                                  handleFontSizeChange("mainTitle", value)
                                 }
                                 onChangeFontStyle={(value) =>
-                                  handleFontChange(
-                                    "mainTitle",
-                                    value,
-                                    "fontStyle",
-                                  )
+                                  handleFontStyleChange("mainTitle", value)
                                 }
                               />
                               <SelectField
@@ -526,43 +606,28 @@ export default function BundleView() {
                                 fontSize={fontSettings.cardTitle.fontSize}
                                 fontStyle={fontSettings.cardTitle.fontStyle}
                                 OnChangeFontSize={(value) =>
-                                  handleFontChange(
-                                    "cardTitle",
-                                    value,
-                                    "fontSize",
-                                  )
+                                  handleFontSizeChange("cardTitle", value)
                                 }
                                 onChangeFontStyle={(value) =>
-                                  handleFontChange(
-                                    "cardTitle",
-                                    value,
-                                    "fontStyle",
-                                  )
+                                  handleFontStyleChange("cardTitle", value)
                                 }
                               />
                             </s-stack>
                             <s-stack
                               direction="inline"
-                              justifyContent="space-between"
-                              gap="base"
+                              gap="large-300"
+                              justifyContent="start"
+                              alignItems="center"
                             >
                               <SelectField
                                 label={"Card Subtitle"}
                                 fontSize={fontSettings.cardSubtitle.fontSize}
                                 fontStyle={fontSettings.cardSubtitle.fontStyle}
                                 OnChangeFontSize={(value) =>
-                                  handleFontChange(
-                                    "cardSubtitle",
-                                    value,
-                                    "fontSize",
-                                  )
+                                  handleFontSizeChange("cardSubtitle", value)
                                 }
                                 onChangeFontStyle={(value) =>
-                                  handleFontChange(
-                                    "cardSubtitle",
-                                    value,
-                                    "fontStyle",
-                                  )
+                                  handleFontStyleChange("cardSubtitle", value)
                                 }
                               />
                               <SelectField
@@ -570,43 +635,28 @@ export default function BundleView() {
                                 fontSize={fontSettings.insideBadge.fontSize}
                                 fontStyle={fontSettings.insideBadge.fontStyle}
                                 OnChangeFontSize={(value) =>
-                                  handleFontChange(
-                                    "insideBadge",
-                                    value,
-                                    "fontSize",
-                                  )
+                                  handleFontSizeChange("insideBadge", value)
                                 }
                                 onChangeFontStyle={(value) =>
-                                  handleFontChange(
-                                    "insideBadge",
-                                    value,
-                                    "fontStyle",
-                                  )
+                                  handleFontStyleChange("insideBadge", value)
                                 }
                               />
                             </s-stack>
                             <s-stack
                               direction="inline"
-                              justifyContent="space-between"
-                              gap="base"
+                              gap="large-300"
+                              justifyContent="start"
+                              alignItems="center"
                             >
                               <SelectField
                                 label={"Outside Badge"}
                                 fontSize={fontSettings.outsideBadge.fontSize}
                                 fontStyle={fontSettings.outsideBadge.fontStyle}
                                 OnChangeFontSize={(value) =>
-                                  handleFontChange(
-                                    "outsideBadge",
-                                    value,
-                                    "fontSize",
-                                  )
+                                  handleFontSizeChange("outsideBadge", value)
                                 }
                                 onChangeFontStyle={(value) =>
-                                  handleFontChange(
-                                    "outsideBadge",
-                                    value,
-                                    "fontStyle",
-                                  )
+                                  handleFontStyleChange("outsideBadge", value)
                                 }
                               />
                               <SelectField
@@ -614,18 +664,10 @@ export default function BundleView() {
                                 fontSize={fontSettings.atcButton.fontSize}
                                 fontStyle={fontSettings.atcButton.fontStyle}
                                 OnChangeFontSize={(value) =>
-                                  handleFontChange(
-                                    "atcButton",
-                                    value,
-                                    "fontSize",
-                                  )
+                                  handleFontSizeChange("atcButton", value)
                                 }
                                 onChangeFontStyle={(value) =>
-                                  handleFontChange(
-                                    "atcButton",
-                                    value,
-                                    "fontStyle",
-                                  )
+                                  handleFontStyleChange("atcButton", value)
                                 }
                               />
                             </s-stack>
@@ -634,13 +676,37 @@ export default function BundleView() {
                         </s-stack>
 
                         <s-stack gap="small-100">
+                          <s-stack direction="inline" gap="large-300">
+                            <s-box inlineSize="200px">
+                              <s-text-field label="Text" />
+                            </s-box>
+                            <s-stack direction="inline" gap="small-300">
+                              <ColorPickerField
+                                color={atcButtonBackgroundColor}
+                                onChange={setAtcButtonBackgroundColor}
+                                label={"Background"}
+                              />
+
+                              <ColorPickerField
+                                color={atcButtonTextColor}
+                                onChange={setAtcButtonTextColor}
+                                label={"text"}
+                              />
+                            </s-stack>
+                          </s-stack>
                           <s-stack
                             direction="inline"
                             justifyContent="space-between"
                           >
                             <s-box InlineSize="250px">
-                              <s-paragraph>Padding Y (0.6rem) </s-paragraph>
+                              <s-paragraph>
+                                Padding Y ({paddingButton}rem){" "}
+                              </s-paragraph>
                               <input
+                                value={paddingButton}
+                                onChange={(e) => {
+                                  setPaddingButton(e.target.value);
+                                }}
                                 style={{ width: "100%" }}
                                 type="range"
                                 min="0"
@@ -649,8 +715,14 @@ export default function BundleView() {
                               ></input>
                             </s-box>
                             <s-box InlineSize="250px">
-                              <s-paragraph>Border Radius (0.3rem) </s-paragraph>
+                              <s-paragraph>
+                                Border Radius ({borderRadiusButton}rem){" "}
+                              </s-paragraph>
                               <input
+                                value={borderRadiusButton}
+                                onChange={(e) => {
+                                  setBorderRadiusButton(e.target.value);
+                                }}
                                 style={{ width: "100%" }}
                                 type="range"
                                 min="0"
@@ -691,7 +763,10 @@ export default function BundleView() {
                         <s-heading>Progressive Gifts</s-heading>
                         <s-icon type="chevron-down" />
                       </s-stack>
-                      <s-switch />
+                      <s-switch
+                        checked={switchState}
+                        onChange={handleSwitchChange}
+                      />
                     </s-stack>
                     {activeIndex.includes(2) && (
                       <s-stack gap="small-100">
@@ -702,7 +777,17 @@ export default function BundleView() {
                         >
                           <s-heading>alignment</s-heading>
                           <s-stack direction="inline" gap="base">
-                            <s-box border="base">
+                            <s-box
+                              borderColor={
+                                selectedGiftImage === "horizontal"
+                                  ? "strong"
+                                  : "base"
+                              }
+                              border="base"
+                              onClick={() =>
+                                handleGiftImageSelect("horizontal")
+                              }
+                            >
                               <s-image
                                 aspectRatio="1"
                                 src="/app/assets/vertical.svg"
@@ -710,7 +795,15 @@ export default function BundleView() {
                               />
                             </s-box>
 
-                            <s-box border="base">
+                            <s-box
+                              borderColor={
+                                selectedGiftImage === "vertical"
+                                  ? "strong"
+                                  : "base"
+                              }
+                              border="base"
+                              onClick={() => handleGiftImageSelect("vertical")}
+                            >
                               <s-image
                                 src="/app/assets/horizontal.svg"
                                 aspectRatio="1"
@@ -723,16 +816,22 @@ export default function BundleView() {
                           direction="inline"
                           justifyContent="space-between"
                         >
-                          <s-box inlineSize="250px">
+                          <s-box inlineSize="245px">
                             <s-text-field
                               label="Titel"
-                              value="Free gifts with your order"
+                              value={textField1}
+                              onChange={(e) => {
+                                setTextField1(e.target.value);
+                              }}
                             />
                           </s-box>
-                          <s-box inlineSize="250px">
+                          <s-box inlineSize="245px">
                             <s-text-field
                               label="Subtitle"
-                              value="Unlock selecting a higher bundle"
+                              value={textField2}
+                              onChange={(e) => {
+                                setTextField2(e.target.value);
+                              }}
                             />
                           </s-box>
                         </s-stack>
@@ -743,7 +842,12 @@ export default function BundleView() {
                               direction="inline"
                               justifyContent="space-between"
                             >
-                              <s-button icon="product">select product</s-button>
+                              <s-button
+                                icon="product"
+                                onClick={handleGiftProduct}
+                              >
+                                select product
+                              </s-button>
                               <s-link
                                 onClick={() => removeGiftSection(gift.id)}
                               >
@@ -751,23 +855,78 @@ export default function BundleView() {
                               </s-link>
                             </s-stack>
 
-                            <s-select label="unlock at">
-                              <s-option>Offer 1</s-option>
-                              <s-option>Offer 2</s-option>
-                              <s-option>Offer 3</s-option>
-                            </s-select>
+                            {giftSections.giftProducts.length > 0 ? (
+                              <s-stack
+                                border="base"
+                                borderRadius="base"
+                                padding="base"
+                              >
+                                {giftSections.giftProducts.map((product) => (
+                                  <s-stack
+                                    key={product.id}
+                                    direction="inline"
+                                    gap="base"
+                                    justifyContent="space-between"
+                                  >
+                                    <s-stack direction="inline" gap="base">
+                                      <s-box inlineSize="50px" blockSize="50px">
+                                        <s-image
+                                          src={
+                                            product.images && product.images[0]
+                                              ? product.images[0].originalSrc
+                                              : ""
+                                          }
+                                          alt={product.title}
+                                          aspectRatio="1/0.5"
+                                          objectFit="cover"
+                                        />
+                                      </s-box>
+                                      <s-box>
+                                        <s-text>{product.title}</s-text>
+                                        <s-paragraph>
+                                          {product.publishedAt}
+                                        </s-paragraph>
+                                      </s-box>
+                                    </s-stack>
 
+                                    <s-box>
+                                      <s-icon
+                                        type="x"
+                                        onClick={() =>
+                                          removeGiftProduct(product.id)
+                                        }
+                                      />
+                                    </s-box>
+                                  </s-stack>
+                                ))}
+                              </s-stack>
+                            ) : (
+                              <s-select label="unlock at">
+                                <s-option>Offer 1</s-option>
+                                <s-option>Offer 2</s-option>
+                                <s-option>Offer 3</s-option>
+                              </s-select>
+                            )}
                             <s-stack
                               direction="inline"
                               justifyContent="space-between"
                             >
                               <s-box inlineSize="250px">
-                                <s-text-field label="Label" value="FREE" />
+                                <s-text-field
+                                  label="Label"
+                                  value={giftType}
+                                  onChange={(e) => {
+                                    setGiftType(e.target.value);
+                                  }}
+                                />
                               </s-box>
                               <s-box inlineSize="250px">
                                 <s-text-field
                                   label="Crossed Label"
-                                  value="{{price}}"
+                                  value={giftPrice}
+                                  onChange={(e) => {
+                                    setGiftPrice(e.target.value);
+                                  }}
                                 />
                               </s-box>
                             </s-stack>
@@ -777,12 +936,21 @@ export default function BundleView() {
                               justifyContent="space-between"
                             >
                               <s-box inlineSize="250px">
-                                <s-text-field label="Label" value="FREE" />
+                                <s-text-field
+                                  label="Title"
+                                  value={giftTitle}
+                                  onChange={(e) => {
+                                    setGiftTitle(e.target.value);
+                                  }}
+                                />
                               </s-box>
                               <s-box inlineSize="250px">
                                 <s-text-field
-                                  label="Crossed Label"
-                                  value="{{price}}"
+                                  label="Locked Title"
+                                  value={giftLock}
+                                  onChange={(e) => {
+                                    setGiftLock(e.target.value);
+                                  }}
                                 />
                               </s-box>
                             </s-stack>
@@ -862,90 +1030,264 @@ export default function BundleView() {
               </s-stack>
             </s-grid-item>
             <s-grid-item gridColumn="span 3">
-              <s-section>
-                <s-stack gap="small-100">
-                  <s-stack
-                    direction="inline"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
+              <div style={{ position: "fixed" }}>
+                <s-section>
+                  <s-stack gap="small-100">
                     <s-stack
                       direction="inline"
-                      gap="small-300"
+                      justifyContent="space-between"
                       alignItems="center"
-                    >
-                      <s-icon type="external" />
-                      <s-link>Preview</s-link>
-                    </s-stack>
-                    <s-box>
-                      <s-button disabled>Run A/B test</s-button>
-                    </s-box>
-                  </s-stack>
-
-                  <s-stack gap="base">
-                    <s-clickable
-                      border="base"
-                      padding="base"
-                      background="subdued"
-                      borderRadius="base"
                     >
                       <s-stack
                         direction="inline"
-                        justifyContent="space-between"
+                        gap="small-300"
+                        alignItems="center"
                       >
-                        <s-box inlineSize="160px">
-                          <s-select label="Product previewing">
-                            <s-option>Gift Card</s-option>
-                          </s-select>
-                        </s-box>
-                        <s-box inlineSize="160px">
-                          <s-select label="Country previewing">
-                            <s-option>Afghanistan </s-option>
-                          </s-select>
-                        </s-box>
+                        <s-icon type="external" />
+                        <s-link>Preview</s-link>
                       </s-stack>
-                    </s-clickable>
+                      <s-box>
+                        <s-button disabled>Run A/B test</s-button>
+                      </s-box>
+                    </s-stack>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: "100%",
-                      }}
-                    >
+                    <s-stack gap="base">
+                      <s-clickable
+                        border="base"
+                        padding="base"
+                        background="subdued"
+                        borderRadius="base"
+                      >
+                        <s-stack
+                          direction="inline"
+                          gap="base"
+                          justifyContent="space-between"
+                        >
+                          <s-box inlineSize="170px">
+                            <s-select label="Product previewing">
+                              <s-option>Gift Card</s-option>
+                            </s-select>
+                          </s-box>
+                          <s-box inlineSize="170px">
+                            <s-select label="Country previewing">
+                              <s-option>Afghanistan </s-option>
+                            </s-select>
+                          </s-box>
+                        </s-stack>
+                      </s-clickable>
+
                       <div
                         style={{
-                          flexGrow: 1,
-                          height: "1px",
-                          backgroundColor: lineleColor,
-                          marginRight: "10px",
-                        }}
-                      ></div>
-
-                      <h2
-                        style={{
-                          margin: "0",
-                          color: titleColor,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "100%",
                         }}
                       >
-                        Bundle & Save
-                      </h2>
-
-                      <div
-                        style={{
-                          flexGrow: 1,
-                          height: "1px",
-                          backgroundColor: lineleColor,
-                          marginLeft: "10px",
-                        }}
-                      ></div>
-                    </div>
-
-                    {selectedImage === "horizontal" ? (
-                      <s-stack gap="small-100">
                         <div
                           style={{
+                            flexGrow: 1,
+                            height: "1px",
+                            backgroundColor: lineleColor,
+                            marginRight: "10px",
+                          }}
+                        ></div>
+
+                        <h2
+                          style={{
+                            fontSize: `${fontSettings.mainTitle.fontSize}px`,
+                            fontWeight: fontSettings.mainTitle.fontStyle,
+                            fontStyle: fontSettings.mainTitle.italic
+                              ? "italic"
+                              : "normal",
+                            margin: "0",
+                            color: titleColor,
+                          }}
+                        >
+                          Bundle & Save
+                        </h2>
+
+                        <div
+                          style={{
+                            flexGrow: 1,
+                            height: "1px",
+                            backgroundColor: lineleColor,
+                            marginLeft: "10px",
+                          }}
+                        ></div>
+                      </div>
+
+                      {selectedImage === "horizontal" ? (
+                        <s-stack gap="small-100">
+                          <div
+                            style={{
+                              border: `solid 2px ${borderColor}`,
+                              borderRadius: `${devBorder}px`,
+                              padding: "10px",
+                              position: "relative",
+                              backgroundColor: cardBgColor,
+                            }}
+                          >
+                            <s-stack
+                              direction="inline"
+                              justifyContent="space-between"
+                            >
+                              <s-stack
+                                direction="inline"
+                                gap="base"
+                                alignItems="center"
+                              >
+                                <s-stack>
+                                  <s-choice-list>
+                                    <s-choice
+                                      defaultSelected
+                                      value="horizontal"
+                                    />
+                                  </s-choice-list>
+                                </s-stack>
+                                <s-stack>
+                                  <s-stack
+                                    direction="inline"
+                                    gap="small-300"
+                                    alignItems="center"
+                                  >
+                                    <h3
+                                      style={{
+                                        fontSize: `${fontSettings.cardTitle.fontSize}px`,
+                                        fontWeight:
+                                          fontSettings.cardTitle.fontStyle,
+                                        fontStyle: fontSettings.cardTitle.italic
+                                          ? "italic"
+                                          : "normal",
+                                        padding: "0px",
+                                        margin: "0px",
+
+                                        color: cardTitleColor,
+                                      }}
+                                    >
+                                      Buy 2
+                                    </h3>
+                                    <s-box>
+                                      <button
+                                        style={{
+                                          fontSize: `${fontSettings.insideBadge.fontSize}px`,
+                                          fontWeight:
+                                            fontSettings.insideBadge.fontStyle,
+                                          fontStyle: fontSettings.insideBadge
+                                            .italic
+                                            ? "italic"
+                                            : "normal",
+                                          backgroundColor: backgroundColor,
+                                          color: textColor,
+                                          borderRadius: "5px",
+                                          padding: "3px",
+                                        }}
+                                      >
+                                        Best Offer
+                                      </button>
+                                    </s-box>
+                                  </s-stack>
+                                  <p
+                                    style={{
+                                      fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
+                                      fontWeight:
+                                        fontSettings.cardSubtitle.fontStyle,
+                                      fontStyle: fontSettings.cardSubtitle
+                                        .italic
+                                        ? "italic"
+                                        : "normal",
+                                      padding: "0px",
+                                      margin: "0px",
+
+                                      color: cardSubtitleColor,
+                                    }}
+                                  >
+                                    5% OFF
+                                  </p>
+                                </s-stack>
+                              </s-stack>
+                              <s-stack>
+                                <s-stack
+                                  alignItems="center"
+                                  justifyContent="center"
+                                >
+                                  <h2 style={{ color: priceColor }}>$19.00</h2>
+                                  {comparePrice && (
+                                    <p style={{ color: comparePriceColor }}>
+                                      $20.00
+                                    </p>
+                                  )}
+                                </s-stack>
+                              </s-stack>
+                            </s-stack>
+                            {showVariantSelection && (
+                              <s-stack
+                                direction="inline"
+                                gap="small-300"
+                                alignItems="center"
+                              >
+                                <s-box>
+                                  <s-button variant="primary">#1</s-button>
+                                </s-box>
+                                {showVariantImag && (
+                                  <div
+                                    style={{
+                                      color: "gray",
+                                      backgroundColor: "rgba(241, 241, 241, 1)",
+                                      padding: `${variantImagSizeValue}px`,
+                                      margin: "0px",
+                                      borderRadius: `${variantImagRadiusValue}px`,
+                                      alignItems: "center",
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    <FiBox
+                                      style={{ width: "15px", height: "15px" }}
+                                    />
+                                  </div>
+                                )}
+                                <s-box inlineSize="100px">
+                                  <s-select>
+                                    <s-option>$10</s-option>
+                                    <s-option>$25</s-option>
+                                    <s-option>$50</s-option>
+                                    <s-option>$100</s-option>
+                                  </s-select>
+                                </s-box>
+                              </s-stack>
+                            )}
+                            <s-stack>{/* later */}</s-stack>
+
+                            <div
+                              style={{
+                                fontSize: `${fontSettings.outsideBadge.fontSize}px`,
+                                fontWeight: fontSettings.outsideBadge.fontStyle,
+                                fontStyle: fontSettings.outsideBadge.italic
+                                  ? "italic"
+                                  : "normal",
+                                right: "-5px",
+                                padding: "5px",
+                                top: "-12px",
+                                borderRadius: "10px",
+                                position: "absolute",
+                                transform: "rotate(20deg)",
+                                transformOrigin: "center",
+                                whiteSpace: "nowrap",
+                                backgroundColor: outsideBackgroundColor,
+                                color: outsideTextColor,
+                              }}
+                            >
+                              Best Seller
+                            </div>
+                          </div>
+                        </s-stack>
+                      ) : selectedImage === "vertical" ? (
+                        <div
+                          style={{
+                            textAlign: "center",
+                            alignItems: "center",
+                            alignContent: "center",
+
                             border: `solid 2px ${borderColor}`,
                             borderRadius: `${devBorder}px`,
                             padding: "10px",
@@ -954,165 +1296,208 @@ export default function BundleView() {
                           }}
                         >
                           <s-stack
-                            direction="inline"
-                            justifyContent="space-between"
+                            direction="block"
+                            justifyContent="center"
+                            alignItems="center"
+                            gap="small-100"
                           >
-                            <s-stack
-                              direction="inline"
-                              gap="base"
-                              alignItems="center"
+                            <s-box>
+                              <s-choice-list>
+                                <s-choice
+                                  defaultSelected
+                                  value="optional"
+                                ></s-choice>
+                              </s-choice-list>
+                            </s-box>
+                            <h3
+                              style={{
+                                fontSize: `${fontSettings.cardTitle.fontSize}px`,
+                                fontWeight: fontSettings.cardTitle.fontStyle,
+                                fontStyle: fontSettings.cardTitle.italic
+                                  ? "italic"
+                                  : "normal",
+                                padding: "0px",
+                                margin: "0px",
+
+                                color: cardTitleColor,
+                              }}
                             >
-                              <s-stack>
-                                <s-choice-list>
-                                  <s-choice
-                                    defaultSelected
-                                    value="horizontal"
-                                  />
-                                </s-choice-list>
-                              </s-stack>
-                              <s-stack>
-                                <s-stack
-                                  direction="inline"
-                                  gap="small-300"
-                                  alignItems="center"
-                                >
-                                  <h3
-                                    style={{
-                                      padding: "0px",
-                                      margin: "0px",
-
-                                      color: cardTitleColor,
-                                    }}
-                                  >
-                                    Buy 2
-                                  </h3>
-                                  <s-box>
-                                    <button
-                                      style={{
-                                        backgroundColor: backgroundColor,
-                                        color: textColor,
-                                        borderRadius: "5px",
-                                        padding: "3px",
-                                      }}
-                                    >
-                                      Best Offer
-                                    </button>
-                                  </s-box>
-                                </s-stack>
-                                <p
-                                  style={{
-                                    padding: "0px",
-                                    margin: "0px",
-
-                                    color: cardSubtitleColor,
-                                  }}
-                                >
-                                  5% OFF
-                                </p>
-                              </s-stack>
-                            </s-stack>
-                            <s-stack>
-                              <s-stack
-                                alignItems="center"
-                                justifyContent="center"
+                              Buy 2
+                            </h3>
+                            <s-box>
+                              <button
+                                style={{
+                                  fontSize: `${fontSettings.insideBadge.fontSize}px`,
+                                  fontWeight:
+                                    fontSettings.insideBadge.fontStyle,
+                                  fontStyle: fontSettings.insideBadge.italic
+                                    ? "italic"
+                                    : "normal",
+                                  backgroundColor: backgroundColor,
+                                  color: textColor,
+                                  borderRadius: "5px",
+                                  padding: "3px",
+                                }}
                               >
-                                <h2 style={{ color: priceColor }}>$19.00</h2>
-                                {comparePrice && (
-                                  <p style={{ color: comparePriceColor }}>
-                                    $20.00
-                                  </p>
-                                )}
-                              </s-stack>
-                            </s-stack>
-                          </s-stack>
-                          {showVariantSelection && (
-                            <s-stack
-                              direction="inline"
-                              gap="small-300"
-                              alignItems="center"
-                            >
-                              <s-box>
-                                <s-button variant="primary">#1</s-button>
-                              </s-box>
-                              {showVariantImag && (
-                                <div
-                                  style={{
-                                    color: "gray",
-                                    backgroundColor: "rgba(241, 241, 241, 1)",
-                                    padding: `${variantImagSizeValue}px`,
-                                    margin: "0px",
-                                    borderRadius: `${variantImagRadiusValue}px`,
-                                    alignItems: "center",
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  <FiBox
-                                    style={{ width: "15px", height: "15px" }}
-                                  />
-                                </div>
-                              )}
-                              <s-box inlineSize="100px">
-                                <s-select>
-                                  <s-option>$10</s-option>
-                                  <s-option>$25</s-option>
-                                  <s-option>$50</s-option>
-                                  <s-option>$100</s-option>
-                                </s-select>
-                              </s-box>
-                            </s-stack>
-                          )}
-                          <s-stack>{/* later */}</s-stack>
+                                Best Offer
+                              </button>
+                            </s-box>
 
+                            <p
+                              style={{
+                                fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
+                                fontWeight: fontSettings.cardSubtitle.fontStyle,
+                                fontStyle: fontSettings.cardSubtitle.italic
+                                  ? "italic"
+                                  : "normal",
+                                padding: "0px",
+                                margin: "0px",
+
+                                color: cardSubtitleColor,
+                              }}
+                            >
+                              5% OFF
+                            </p>
+                            <h2
+                              style={{
+                                color: priceColor,
+                                padding: "0px",
+                                margin: "0px",
+                              }}
+                            >
+                              $19.00
+                            </h2>
+                            {comparePrice && (
+                              <p style={{ color: comparePriceColor }}>$20.00</p>
+                            )}
+
+                            <div
+                              style={{
+                                fontSize: `${fontSettings.outsideBadge.fontSize}px`,
+                                fontWeight: fontSettings.outsideBadge.fontStyle,
+                                fontStyle: fontSettings.outsideBadge.italic
+                                  ? "italic"
+                                  : "normal",
+
+                                padding: "5px",
+                                top: "-12px",
+                                borderRadius: "10px",
+                                position: "absolute",
+
+                                backgroundColor: outsideBackgroundColor,
+                                color: outsideTextColor,
+                              }}
+                            >
+                              {" "}
+                              Best Seller
+                            </div>
+                          </s-stack>
+                        </div>
+                      ) : null}
+                      {switchState && (
+                        <s-stack justifyContent="center" alignItems="center">
+                          <h2 style={{ margin: "0px", padding: "0px" }}>
+                            {textField1}
+                          </h2>
+
+                          <p style={{ margin: "0px", padding: "0px" }}>
+                            {textField2}
+                          </p>
+                        </s-stack>
+                      )}
+
+                      {giftProducts.length > 0 &&
+                        (selectedGiftImage === "horizontal" ? (
                           <div
                             style={{
-                              right: "-5px",
-                              padding: "5px",
-                              top: "-12px",
+                              border: "solid 2px #AAF0FB",
                               borderRadius: "10px",
-                              position: "absolute",
-                              transform: "rotate(20deg)",
-                              transformOrigin: "center",
-                              whiteSpace: "nowrap",
-                              backgroundColor: outsideBackgroundColor,
-                              color: outsideTextColor,
+                              alignItems: "center",
+                              padding: "10px",
                             }}
                           >
-                            Best Seller
+                            {giftProducts.map((product) => (
+                              <s-stack
+                                key={product.id}
+                                direction="inline"
+                                gap="base"
+                                justifyContent="space-between"
+                              >
+                                <s-stack
+                                  direction="inline"
+                                  gap="base"
+                                  alignItems="center"
+                                >
+                                  <s-box inlineSize="50px" blockSize="50px">
+                                    <s-image
+                                      src={
+                                        product.images && product.images[0]
+                                          ? product.images[0].originalSrc
+                                          : ""
+                                      }
+                                      alt={product.title}
+                                      aspectRatio="1/0.5"
+                                      objectFit="cover"
+                                    />
+                                  </s-box>
+                                  <s-stack
+                                    direction="inline"
+                                    gap="small-100"
+                                    paddingBlockStart="small"
+                                  >
+                                    <s-text>{giftTitle}</s-text>
+                                    <button
+                                      style={{
+                                        padding: "5px",
+                                        border: "none",
+                                        borderRadius: "10px",
+                                        backgroundColor: "#AAF0FB",
+                                        color: "black",
+                                      }}
+                                    >
+                                      <span>{giftType}</span>
+                                      <span
+                                        style={{
+                                          marginLeft: "4px",
+                                          textDecorationLine: "line-through",
+                                        }}
+                                      >
+                                        {giftPrice}
+                                      </span>
+                                    </button>
+                                  </s-stack>
+                                </s-stack>
+                              </s-stack>
+                            ))}
                           </div>
-                        </div>
-                      </s-stack>
-                    ) : selectedImage === "vertical" ? (
-                      <s-stack
-                        border="base"
-                        padding="base"
-                        borderRadius="base"
-                        direction="block"
-                        justifyContent="center"
-                        alignItems="center"
-                      >
-                        <s-box>
-                          <s-choice-list>
-                            <s-choice value="optional"></s-choice>
-                          </s-choice-list>
-                        </s-box>
-                        <h3 style={{ padding: "0px", margin: "0px" }}>Buy3</h3>
-                        <s-box>
-                          <s-button variant="primary">Best Offer</s-button>
-                        </s-box>
+                        ) : selectedGiftImage === "vertical" ? (
+                          <div>
+                            <p>hello</p>
+                          </div>
+                        ) : null)}
 
-                        <p style={{ padding: "0px", margin: "0px" }}>5% OFF</p>
-                        <p style={{ padding: "0px", margin: "0px" }}>
-                          <b>$19.00</b>
-                        </p>
-                        <p style={{ padding: "0px", margin: "0px" }}>$20.00</p>
+                      <s-stack justifyContent="center" alignItems="center">
+                        <button
+                          style={{
+                            fontSize: `${fontSettings.atcButton.fontSize}px`,
+                            fontWeight: fontSettings.atcButton.fontStyle,
+                            fontStyle: fontSettings.atcButton.italic
+                              ? "italic"
+                              : "normal",
+                            width: "100%",
+                            backgroundColor: atcButtonBackgroundColor,
+                            color: atcButtonTextColor,
+                            padding: `${paddingButton}px 10px`,
+                            borderRadius: `${borderRadiusButton}px`,
+                          }}
+                        >
+                          Add To Card
+                        </button>
                       </s-stack>
-                    ) : null}
-                    <s-stack justifyContent="center" alignItems="center">
-                      <s-button variant="primary">Add To Cart</s-button>
                     </s-stack>
                   </s-stack>
-                </s-stack>
-              </s-section>
+                </s-section>
+              </div>
             </s-grid-item>
           </s-grid>
         </s-query-container>
