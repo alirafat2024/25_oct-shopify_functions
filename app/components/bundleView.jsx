@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColorPickerField } from "./ColorPickerField";
 import { SelectField } from "./selectField";
 import { Offers } from "./offers";
 import { FiBox } from "react-icons/fi";
 export default function BundleView() {
   //////////Progressive Gifts/////////////////
+
   const [giftSections, setGiftSections] = useState([]);
   const [textField1, setTextField1] = useState("🎁 Free gifts with your order");
   const [textField2, setTextField2] = useState(
@@ -17,6 +18,7 @@ export default function BundleView() {
   const [giftType, setGiftType] = useState("FREE");
   const [giftLock, setGiftLock] = useState("Lock");
   const [selectedGiftImage, setSelectedGiftImage] = useState("horizontal");
+  const [selectedGiftProducts, setSelectedGiftProducts] = useState([]);
 
   const handleGiftImageSelect = (image) => {
     setSelectedGiftImage(image);
@@ -31,14 +33,19 @@ export default function BundleView() {
       type: "product",
       multiple: true,
     });
-
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    console.log(giftSectionId);
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    const newGiftTitle = selected.length > 0 ? selected[0].title : "";
     setGiftSections((prevSections) =>
       prevSections.map((section) =>
         section.id === giftSectionId
-          ? { ...section, giftProducts: selected }
+          ? { ...section, giftProducts: selected, giftTitle: newGiftTitle }
           : section,
       ),
     );
+
+    setSelectedGiftProducts(selected);
   };
 
   const removeGiftProduct = (productId, giftSectionId) => {
@@ -54,18 +61,24 @@ export default function BundleView() {
           : section,
       ),
     );
+    setGiftTitle("");
   };
 
-  const addGiftSection = () => {
+  const addGiftSection = async () => {
+    const newOfferNumber = (giftSections.length % 3) + 1;
     const newGift = {
       id: Math.random(),
       giftType: "FREE",
       giftPrice: "$10.00",
+      giftTitle: giftTitle || "{{Title}}",
       giftLock: "Lock",
       giftProducts: [],
+      giftOffer: newOfferNumber.toString(),
     };
+
     setGiftSections([...giftSections, newGift]);
   };
+
   const removeGiftSection = (id) => {
     setGiftSections(giftSections.filter((gift) => gift.id !== id));
   };
@@ -73,12 +86,29 @@ export default function BundleView() {
   const updateGiftSectionField = (value, field, giftSectionId) => {
     setGiftSections((prevSections) =>
       prevSections.map((section) =>
+        section.id === giftSectionId ? { ...section, [field]: value } : section,
+      ),
+    );
+  };
+
+  const handleOfferChange = (e, giftSectionId) => {
+    const selectedOffer = e.target.value;
+
+    setGiftSections((prevSections) =>
+      prevSections.map((section) =>
         section.id === giftSectionId
-          ? { ...section, [field]: value } 
+          ? { ...section, giftOffer: selectedOffer }
           : section,
       ),
     );
   };
+
+  const offerOptions = [
+    { value: "1", label: "Offer1" },
+    { value: "2", label: "Offer2" },
+    { value: "3", label: "Offer3" },
+  ];
+
   //////////////////////////////////////////
   // Card Colors
   const [titleColor, setTitleColor] = useState("#000000");
@@ -844,7 +874,7 @@ export default function BundleView() {
                             >
                               <s-button
                                 icon="product"
-                                onClick={handleGiftProduct}
+                                onClick={() => handleGiftProduct(gift.id)}
                               >
                                 select product
                               </s-button>
@@ -855,58 +885,72 @@ export default function BundleView() {
                               </s-link>
                             </s-stack>
 
-                            {giftSections.giftProducts.length > 0 ? (
-                              <s-stack
-                                border="base"
-                                borderRadius="base"
-                                padding="base"
-                              >
-                                {giftSections.giftProducts.map((product) => (
-                                  <s-stack
-                                    key={product.id}
-                                    direction="inline"
-                                    gap="base"
-                                    justifyContent="space-between"
-                                  >
-                                    <s-stack direction="inline" gap="base">
-                                      <s-box inlineSize="50px" blockSize="50px">
-                                        <s-image
-                                          src={
-                                            product.images && product.images[0]
-                                              ? product.images[0].originalSrc
-                                              : ""
+                            {gift.giftProducts &&
+                              gift.giftProducts.length > 0 && (
+                                <s-stack
+                                  border="base"
+                                  borderRadius="base"
+                                  padding="base"
+                                >
+                                  {gift.giftProducts.map((product) => (
+                                    <s-stack
+                                      key={product.id}
+                                      direction="inline"
+                                      gap="base"
+                                      justifyContent="space-between"
+                                    >
+                                      <s-stack direction="inline" gap="base">
+                                        <s-box
+                                          inlineSize="50px"
+                                          blockSize="50px"
+                                        >
+                                          <s-image
+                                            src={
+                                              product.images &&
+                                              product.images[0]
+                                                ? product.images[0].originalSrc
+                                                : ""
+                                            }
+                                            alt={product.title}
+                                            aspectRatio="1/0.5"
+                                            objectFit="cover"
+                                          />
+                                        </s-box>
+                                        <s-box>
+                                          <s-text>{product.title}</s-text>
+                                          <s-paragraph>
+                                            {product.publishedAt}
+                                          </s-paragraph>
+                                        </s-box>
+                                      </s-stack>
+
+                                      <s-box>
+                                        <s-icon
+                                          type="x"
+                                          onClick={() =>
+                                            removeGiftProduct(
+                                              product.id,
+                                              gift.id,
+                                            )
                                           }
-                                          alt={product.title}
-                                          aspectRatio="1/0.5"
-                                          objectFit="cover"
                                         />
                                       </s-box>
-                                      <s-box>
-                                        <s-text>{product.title}</s-text>
-                                        <s-paragraph>
-                                          {product.publishedAt}
-                                        </s-paragraph>
-                                      </s-box>
                                     </s-stack>
+                                  ))}
+                                </s-stack>
+                              )}
+                            <s-select
+                              label="Unlock at"
+                              value={gift.giftOffer}
+                              onChange={(e) => handleOfferChange(e, gift.id)}
+                            >
+                              {offerOptions.map((offer) => (
+                                <s-option key={offer.value} value={offer.value}>
+                                  {offer.label}
+                                </s-option>
+                              ))}
+                            </s-select>
 
-                                    <s-box>
-                                      <s-icon
-                                        type="x"
-                                        onClick={() =>
-                                          removeGiftProduct(product.id)
-                                        }
-                                      />
-                                    </s-box>
-                                  </s-stack>
-                                ))}
-                              </s-stack>
-                            ) : (
-                              <s-select label="unlock at">
-                                <s-option>Offer 1</s-option>
-                                <s-option>Offer 2</s-option>
-                                <s-option>Offer 3</s-option>
-                              </s-select>
-                            )}
                             <s-stack
                               direction="inline"
                               justifyContent="space-between"
@@ -916,7 +960,11 @@ export default function BundleView() {
                                   label="Label"
                                   value={giftType}
                                   onChange={(e) => {
-                                    setGiftType(e.target.value);
+                                    updateGiftSectionField(
+                                      e.target.value,
+                                      "giftType",
+                                      gift.id,
+                                    );
                                   }}
                                 />
                               </s-box>
@@ -925,7 +973,11 @@ export default function BundleView() {
                                   label="Crossed Label"
                                   value={giftPrice}
                                   onChange={(e) => {
-                                    setGiftPrice(e.target.value);
+                                    updateGiftSectionField(
+                                      e.target.value,
+                                      "giftPrice",
+                                      gift.id,
+                                    );
                                   }}
                                 />
                               </s-box>
@@ -940,7 +992,11 @@ export default function BundleView() {
                                   label="Title"
                                   value={giftTitle}
                                   onChange={(e) => {
-                                    setGiftTitle(e.target.value);
+                                    updateGiftSectionField(
+                                      e.target.value,
+                                      "giftTitle",
+                                      gift.id,
+                                    );
                                   }}
                                 />
                               </s-box>
@@ -949,7 +1005,11 @@ export default function BundleView() {
                                   label="Locked Title"
                                   value={giftLock}
                                   onChange={(e) => {
-                                    setGiftLock(e.target.value);
+                                    updateGiftSectionField(
+                                      e.target.value,
+                                      "giftLock",
+                                      gift.id,
+                                    );
                                   }}
                                 />
                               </s-box>
@@ -1405,76 +1465,204 @@ export default function BundleView() {
                           </p>
                         </s-stack>
                       )}
-
-                      {giftProducts.length > 0 &&
-                        (selectedGiftImage === "horizontal" ? (
-                          <div
-                            style={{
-                              border: "solid 2px #AAF0FB",
-                              borderRadius: "10px",
-                              alignItems: "center",
-                              padding: "10px",
-                            }}
-                          >
-                            {giftProducts.map((product) => (
-                              <s-stack
-                                key={product.id}
-                                direction="inline"
-                                gap="base"
-                                justifyContent="space-between"
+                      {selectedGiftImage === "horizontal" ? (
+                        giftSections.map((giftSection) => (
+                          <div key={giftSection.id}>
+                            {giftSection.giftProducts.length > 0 ? (
+                              <div
+                                style={{
+                                  border: "solid 2px #AAF0FB",
+                                  borderRadius: "10px",
+                                  padding: "10px",
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  alignItems: "stretch",
+                                  height: "50px",
+                                
+                                  justifyContent: "space-between",
+                                }}
                               >
-                                <s-stack
-                                  direction="inline"
-                                  gap="base"
-                                  alignItems="center"
-                                >
-                                  <s-box inlineSize="50px" blockSize="50px">
-                                    <s-image
-                                      src={
-                                        product.images && product.images[0]
-                                          ? product.images[0].originalSrc
-                                          : ""
-                                      }
-                                      alt={product.title}
-                                      aspectRatio="1/0.5"
-                                      objectFit="cover"
-                                    />
-                                  </s-box>
-                                  <s-stack
-                                    direction="inline"
-                                    gap="small-100"
-                                    paddingBlockStart="small"
-                                  >
-                                    <s-text>{giftTitle}</s-text>
-                                    <button
+                                {giftSection.giftOffer === "1" ? (
+                                  giftSection.giftProducts.map((product) => (
+                                    <div
+                                      key={product.id}
                                       style={{
-                                        padding: "5px",
-                                        border: "none",
-                                        borderRadius: "10px",
-                                        backgroundColor: "#AAF0FB",
-                                        color: "black",
+                                        flex: 1, 
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                       }}
                                     >
-                                      <span>{giftType}</span>
-                                      <span
+                                      <s-stack
+                                        direction="inline"
+                                        gap="base"
+                                        alignItems="center"
+                                      >
+                                        <s-box
+                                          inlineSize="50px"
+                                          blockSize="50px"
+                                        >
+                                          <s-image
+                                            src={
+                                              product.images &&
+                                              product.images[0]
+                                                ? product.images[0].originalSrc
+                                                : ""
+                                            }
+                                            alt={product.title}
+                                            aspectRatio="1/0.5"
+                                            objectFit="cover"
+                                          />
+                                        </s-box>
+                                        <s-stack
+                                          direction="inline"
+                                          gap="small-100"
+                                          paddingBlockStart="small"
+                                        >
+                                          <s-text>
+                                            {giftSection.giftTitle}
+                                          </s-text>
+                                          <button
+                                            style={{
+                                              padding: "5px",
+                                              border: "none",
+                                              borderRadius: "10px",
+                                              backgroundColor: "#AAF0FB",
+                                              color: "black",
+                                            }}
+                                          >
+                                            <span>{giftSection.giftType}</span>
+                                            <span
+                                              style={{
+                                                marginLeft: "4px",
+                                                textDecorationLine:
+                                                  "line-through",
+                                              }}
+                                            >
+                                              {giftSection.giftPrice}
+                                            </span>
+                                          </button>
+                                        </s-stack>
+                                      </s-stack>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <s-stack direction="inline" gap="small-300" alignItems="center">
+                                    <s-icon type="lock" />
+                                    <span>{giftSection.giftLock}</span>
+                                  </s-stack>
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
+                        ))
+                      ) : selectedGiftImage === "vertical" ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "10px",
+                            justifyContent: "space-between",
+                            alignItems: "stretch",
+                            width: "100%",
+                          }}
+                        >
+                          {giftSections.map(
+                            (giftSection) =>
+                              giftSection.giftProducts.length > 0 && (
+                                <div
+                                  key={giftSection.id}
+                                  style={{
+                                    border: "solid 2px #AAF0FB",
+                                    borderRadius: "10px",
+                                    position: "relative",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    flex: 1,
+                                    marginBottom: "10px",
+                                  }}
+                                >
+                                  {giftSection.giftOffer === "1" ? (
+                                    giftSection.giftProducts.map((product) => (
+                                      <div
+                                        key={product.id}
                                         style={{
-                                          marginLeft: "4px",
-                                          textDecorationLine: "line-through",
+                                          position: "relative",
+                                          marginTop: "20px",
+                                          marginBottom: "10px",
+                                          flex: 1,
                                         }}
                                       >
-                                        {giftPrice}
-                                      </span>
-                                    </button>
-                                  </s-stack>
-                                </s-stack>
-                              </s-stack>
-                            ))}
-                          </div>
-                        ) : selectedGiftImage === "vertical" ? (
-                          <div>
-                            <p>hello</p>
-                          </div>
-                        ) : null)}
+                                        <s-stack
+                                          gap="base"
+                                          direction="block"
+                                          alignItems="center"
+                                        >
+                                          <s-box
+                                            inlineSize="50px"
+                                            blockSize="50px"
+                                          >
+                                            <s-image
+                                              src={
+                                                product.images &&
+                                                product.images[0]
+                                                  ? product.images[0]
+                                                      .originalSrc
+                                                  : ""
+                                              }
+                                              alt={product.title}
+                                              aspectRatio="1/0.5"
+                                              objectFit="cover"
+                                            />
+                                          </s-box>
+                                          <s-text>
+                                            {giftSection.giftTitle}
+                                          </s-text>
+                                        </s-stack>
+                                        <button
+                                          style={{
+                                            padding: "5px",
+                                            border: "none",
+                                            borderRadius: "10px",
+                                            backgroundColor: "#AAF0FB",
+                                            color: "black",
+                                            position: "absolute",
+                                            top: "-30px",
+                                            left: "50%",
+                                            transform: "translateX(-50%)",
+                                          }}
+                                        >
+                                          <span>{giftSection.giftType}</span>
+                                          <span
+                                            style={{
+                                              marginLeft: "4px",
+                                              textDecorationLine:
+                                                "line-through",
+                                            }}
+                                          >
+                                            {giftSection.giftPrice}
+                                          </span>
+                                        </button>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div>
+                                      <s-stack
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        direction="block"
+                                        gap="small-300"
+                                        padding="large-300"
+                                      >
+                                        <s-icon type="lock" />
+                                        <span>{giftSection.giftLock}</span>
+                                      </s-stack>
+                                    </div>
+                                  )}
+                                </div>
+                              ),
+                          )}
+                        </div>
+                      ) : null}
 
                       <s-stack justifyContent="center" alignItems="center">
                         <button
