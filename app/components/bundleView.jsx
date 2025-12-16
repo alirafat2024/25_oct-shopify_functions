@@ -33,9 +33,7 @@ export default function BundleView() {
       type: "product",
       multiple: true,
     });
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    console.log(giftSectionId);
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
     const newGiftTitle = selected.length > 0 ? selected[0].title : "";
     setGiftSections((prevSections) =>
       prevSections.map((section) =>
@@ -171,7 +169,6 @@ export default function BundleView() {
   const [selectedImage, setSelectedImage] = useState("horizontal");
   const [activeIndex, setActiveIndex] = useState([]);
 
-  const [offerSections, setOfferSections] = useState([]);
   const [showVariantSelection, setShowVariantSelection] = useState(false);
   const [showVariantImag, setShowVariantImg] = useState(false);
   const [variantImagSizeValue, setVariantImagSizeValue] = useState(2);
@@ -211,8 +208,34 @@ export default function BundleView() {
     setShowVariantImg(!showVariantImag);
   };
 
+  /////////////////////////////////////////////////////////////
+
+  const [offerSections, setOfferSections] = useState([]);
+  const [titleOffer, setTitleOffer] = useState("");
+  const [subtitleOffer, setSubtitleOffer] = useState("");
+  const [defaultSelected, setDefaultSelected] = useState(false);
+  const [insideBadgeText, setInsideBadgeText] = useState("");
+  const [outsideBadgeText, setOutsideBadgeText] = useState("");
+  const [discountType, setDiscountType] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [displayProductImage, setDisplayProductImage] = useState(false);
+  const [imageSize, setImageSize] = useState("");
+  const [imageBorderRadius, setImageBorderRadius] = useState(10);
+
   const addOfferSection = () => {
-    const newOffer = { id: Math.random() };
+    const newOffer = {
+      id: Math.random(),
+      titleOffer,
+      subtitleOffer,
+      defaultSelected,
+      insideBadgeText,
+      outsideBadgeText,
+      discountType,
+      quantity,
+      displayProductImage,
+      imageSize,
+      imageBorderRadius,
+    };
     setOfferSections([...offerSections, newOffer]);
   };
 
@@ -1066,7 +1089,30 @@ export default function BundleView() {
                         </s-stack>
                       </s-stack>
 
-                      {activeIndex.includes(addSection.id) && <Offers />}
+                      {activeIndex.includes(addSection.id) && (
+                        <Offers
+                          titleOffer={titleOffer}
+                          onChangeTitleOffer={setTitleOffer}
+                          subtitleOffer={subtitleOffer}
+                          onChangeSubtitleOffer={setSubtitleOffer}
+                          defaultSelected={defaultSelected}
+                          onChangeDefaultSelected={setDefaultSelected}
+                          insideBadgeText={insideBadgeText}
+                          onChangeInsideBadgeText={setInsideBadgeText}
+                          outsideBadgeText={outsideBadgeText}
+                          onChangeOutSideBadgeText={setOutsideBadgeText}
+                          discountType={discountType}
+                          onChangeDiscountType={setDiscountType}
+                          quantity={quantity}
+                          onChangeQuantity={setQuantity}
+                          displayProductImage={displayProductImage}
+                          onChangeDisplayProductImage={setDisplayProductImage}
+                          imageSize={imageSize}
+                          onChangeImageSize={setImageSize}
+                          imageBorderRadius={imageBorderRadius}
+                          onChangeImageBorderRadius={setImageBorderRadius}
+                        />
+                      )}
                     </s-stack>
                   </s-section>
                 ))}
@@ -1177,56 +1223,237 @@ export default function BundleView() {
                         ></div>
                       </div>
 
-                      {selectedImage === "horizontal" ? (
-                        <s-stack gap="small-100">
-                          <div
-                            style={{
-                              border: `solid 2px ${borderColor}`,
-                              borderRadius: `${devBorder}px`,
-                              padding: "10px",
-                              position: "relative",
-                              backgroundColor: cardBgColor,
-                            }}
-                          >
-                            <s-stack
-                              direction="inline"
-                              justifyContent="space-between"
-                            >
-                              <s-stack
-                                direction="inline"
-                                gap="base"
-                                alignItems="center"
+                      {selectedImage === "horizontal"
+                        ? offerSections.map((addSection, index) => (
+                            <s-stack key={index} gap="small-100">
+                              <div
+                                style={{
+                                  border: `solid 2px ${borderColor}`,
+                                  borderRadius: `${devBorder}px`,
+                                  padding: "10px",
+                                  position: "relative",
+                                  backgroundColor: cardBgColor,
+                                }}
                               >
-                                <s-stack>
-                                  <s-choice-list>
-                                    <s-choice
-                                      defaultSelected
-                                      value="horizontal"
-                                    />
-                                  </s-choice-list>
+                                <s-stack
+                                  direction="inline"
+                                  justifyContent="space-between"
+                                >
+                                  <s-stack
+                                    direction="inline"
+                                    gap="base"
+                                    alignItems="center"
+                                  >
+                                    <s-choice-list>
+                                      <s-choice
+                                        defaultSelected
+                                        value="horizontal"
+                                      />
+                                    </s-choice-list>
+                                    <s-stack
+                                      direction="inline"
+                                      gap="small-300"
+                                      alignItems="center"
+                                    >
+                                      <h3
+                                        style={{
+                                          fontSize: `${fontSettings.cardTitle.fontSize}px`,
+                                          fontWeight:
+                                            fontSettings.cardTitle.fontStyle,
+                                          fontStyle: fontSettings.cardTitle
+                                            .italic
+                                            ? "italic"
+                                            : "normal",
+                                          color: cardTitleColor,
+                                        }}
+                                      >
+                                        {titleOffer}
+                                      </h3>
+                                      <s-box>
+                                        <button
+                                          style={{
+                                            fontSize: `${fontSettings.insideBadge.fontSize}px`,
+                                            fontWeight:
+                                              fontSettings.insideBadge
+                                                .fontStyle,
+                                            fontStyle: fontSettings.insideBadge
+                                              .italic
+                                              ? "italic"
+                                              : "normal",
+                                            backgroundColor: backgroundColor,
+                                            color: textColor,
+                                            borderRadius: "5px",
+                                            padding: "3px",
+                                          }}
+                                        >
+                                          {insideBadgeText}
+                                        </button>
+                                      </s-box>
+                                    </s-stack>
+                                    <p
+                                      style={{
+                                        fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
+                                        fontWeight:
+                                          fontSettings.cardSubtitle.fontStyle,
+                                        fontStyle: fontSettings.cardSubtitle
+                                          .italic
+                                          ? "italic"
+                                          : "normal",
+                                        color: cardSubtitleColor,
+                                      }}
+                                    >
+                                      {subtitleOffer}
+                                    </p>
+                                  </s-stack>
+
+                                  <s-stack
+                                    alignItems="center"
+                                    justifyContent="center"
+                                  >
+                                    <h2 style={{ color: priceColor }}>
+                                      $19.00
+                                    </h2>
+                                    {comparePrice && (
+                                      <p style={{ color: comparePriceColor }}>
+                                        $20.00
+                                      </p>
+                                    )}
+                                  </s-stack>
                                 </s-stack>
-                                <s-stack>
+                                    
+                                {showVariantSelection && (
                                   <s-stack
                                     direction="inline"
                                     gap="small-300"
                                     alignItems="center"
                                   >
+                                    <s-box>
+                                      <s-button variant="primary">#1</s-button>
+                                    </s-box>
+                                    {showVariantImag && (
+                                      <div
+                                        style={{
+                                          color: "gray",
+                                          backgroundColor:
+                                            "rgba(241, 241, 241, 1)",
+                                          padding: `${variantImagSizeValue}px`,
+                                          margin: "0px",
+                                          borderRadius: `${variantImagRadiusValue}px`,
+                                          alignItems: "center",
+                                          textAlign: "center",
+                                        }}
+                                      >
+                                        <FiBox
+                                          style={{
+                                            width: "15px",
+                                            height: "15px",
+                                          }}
+                                        />
+                                      </div>
+                                    )}
+                                    <s-box inlineSize="100px">
+                                      <s-select>
+                                        <s-option>$10</s-option>
+                                        <s-option>$25</s-option>
+                                        <s-option>$50</s-option>
+                                        <s-option>$100</s-option>
+                                      </s-select>
+                                    </s-box>
+                                  </s-stack>
+                                )}
+
+                                <div
+                                  style={{
+                                    fontSize: `${fontSettings.outsideBadge.fontSize}px`,
+                                    fontWeight:
+                                      fontSettings.outsideBadge.fontStyle,
+                                    fontStyle: fontSettings.outsideBadge.italic
+                                      ? "italic"
+                                      : "normal",
+                                    right: "-5px",
+                                    padding: "5px",
+                                    top: "-12px",
+                                    borderRadius: "10px",
+                                    position: "absolute",
+                                    transform: "rotate(20deg)",
+                                    transformOrigin: "center",
+                                    whiteSpace: "nowrap",
+                                    backgroundColor: outsideBackgroundColor,
+                                    color: outsideTextColor,
+                                  }}
+                                >
+                                  {outsideBadgeText}
+                                </div>
+                              </div>
+                            </s-stack>
+                          ))
+                        : selectedImage === "vertical" && (
+                            <div
+                              style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: "10px",
+                                justifyContent: "space-between",
+                                alignItems: "stretch",
+                                width: "100%",
+                              }}
+                            >
+                              {offerSections.map((addSection, index) => (
+                                <div
+                                  key={index}
+                                  style={{
+                                    textAlign: "center",
+                                    alignContent: "center",
+                                    border: `solid 2px ${borderColor}`,
+                                    borderRadius: `${devBorder}px`,
+                                    padding: "10px",
+                                    position: "relative",
+                                    backgroundColor: cardBgColor,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    flexWrap: "wrap",
+                                    gap: "10px",
+                                    justifyContent: "space-between",
+                                    alignItems: "stretch",
+                                    flex: 1,
+                                  }}
+                                >
+                                  <div
+                                    style={{
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      width: "100%",
+                                    }}
+                                  >
+                                    <s-box>
+                                      <s-choice-list>
+                                        <s-choice
+                                          defaultSelected
+                                          value="optional"
+                                        />
+                                      </s-choice-list>
+                                    </s-box>
+
                                     <h3
                                       style={{
+                                        width: "100%",
+                                        justifyContent:"center",
+                                        alignItems:"center",
                                         fontSize: `${fontSettings.cardTitle.fontSize}px`,
                                         fontWeight:
                                           fontSettings.cardTitle.fontStyle,
                                         fontStyle: fontSettings.cardTitle.italic
                                           ? "italic"
                                           : "normal",
-                                        padding: "0px",
-                                        margin: "0px",
-
                                         color: cardTitleColor,
                                       }}
                                     >
                                       Buy 2
                                     </h3>
+
+                                    {/* Best Offer Button */}
                                     <s-box>
                                       <button
                                         style={{
@@ -1246,214 +1473,67 @@ export default function BundleView() {
                                         Best Offer
                                       </button>
                                     </s-box>
-                                  </s-stack>
-                                  <p
-                                    style={{
-                                      fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
-                                      fontWeight:
-                                        fontSettings.cardSubtitle.fontStyle,
-                                      fontStyle: fontSettings.cardSubtitle
-                                        .italic
-                                        ? "italic"
-                                        : "normal",
-                                      padding: "0px",
-                                      margin: "0px",
 
-                                      color: cardSubtitleColor,
-                                    }}
-                                  >
-                                    5% OFF
-                                  </p>
-                                </s-stack>
-                              </s-stack>
-                              <s-stack>
-                                <s-stack
-                                  alignItems="center"
-                                  justifyContent="center"
-                                >
-                                  <h2 style={{ color: priceColor }}>$19.00</h2>
-                                  {comparePrice && (
-                                    <p style={{ color: comparePriceColor }}>
-                                      $20.00
+                                    {/* Discount Info */}
+                                    <p
+                                      style={{
+                                        fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
+                                        fontWeight:
+                                          fontSettings.cardSubtitle.fontStyle,
+                                        fontStyle: fontSettings.cardSubtitle
+                                          .italic
+                                          ? "italic"
+                                          : "normal",
+                                        color: cardSubtitleColor,
+                                      }}
+                                    >
+                                      5% OFF
                                     </p>
-                                  )}
-                                </s-stack>
-                              </s-stack>
-                            </s-stack>
-                            {showVariantSelection && (
-                              <s-stack
-                                direction="inline"
-                                gap="small-300"
-                                alignItems="center"
-                              >
-                                <s-box>
-                                  <s-button variant="primary">#1</s-button>
-                                </s-box>
-                                {showVariantImag && (
-                                  <div
-                                    style={{
-                                      color: "gray",
-                                      backgroundColor: "rgba(241, 241, 241, 1)",
-                                      padding: `${variantImagSizeValue}px`,
-                                      margin: "0px",
-                                      borderRadius: `${variantImagRadiusValue}px`,
-                                      alignItems: "center",
-                                      textAlign: "center",
-                                    }}
-                                  >
-                                    <FiBox
-                                      style={{ width: "15px", height: "15px" }}
-                                    />
+
+                                    {/* Price Information */}
+                                    <h2
+                                      style={{
+                                        color: priceColor,
+                                        padding: "0px",
+                                        margin: "0px",
+                                      }}
+                                    >
+                                      $19.00
+                                    </h2>
+
+                                    {/* Compare Price */}
+                                    {comparePrice && (
+                                      <p style={{ color: comparePriceColor }}>
+                                        $20.00
+                                      </p>
+                                    )}
+
+                                    {/* Outside Badge */}
+                                    <div
+                                      style={{
+                                        fontSize: `${fontSettings.outsideBadge.fontSize}px`,
+                                        fontWeight:
+                                          fontSettings.outsideBadge.fontStyle,
+                                        fontStyle: fontSettings.outsideBadge
+                                          .italic
+                                          ? "italic"
+                                          : "normal",
+                                        padding: "5px",
+                                        top: "-12px",
+                                        borderRadius: "10px",
+                                        position: "absolute",
+                                        backgroundColor: outsideBackgroundColor,
+                                        color: outsideTextColor,
+                                      }}
+                                    >
+                                      Best Seller
+                                    </div>
                                   </div>
-                                )}
-                                <s-box inlineSize="100px">
-                                  <s-select>
-                                    <s-option>$10</s-option>
-                                    <s-option>$25</s-option>
-                                    <s-option>$50</s-option>
-                                    <s-option>$100</s-option>
-                                  </s-select>
-                                </s-box>
-                              </s-stack>
-                            )}
-                            <s-stack>{/* later */}</s-stack>
-
-                            <div
-                              style={{
-                                fontSize: `${fontSettings.outsideBadge.fontSize}px`,
-                                fontWeight: fontSettings.outsideBadge.fontStyle,
-                                fontStyle: fontSettings.outsideBadge.italic
-                                  ? "italic"
-                                  : "normal",
-                                right: "-5px",
-                                padding: "5px",
-                                top: "-12px",
-                                borderRadius: "10px",
-                                position: "absolute",
-                                transform: "rotate(20deg)",
-                                transformOrigin: "center",
-                                whiteSpace: "nowrap",
-                                backgroundColor: outsideBackgroundColor,
-                                color: outsideTextColor,
-                              }}
-                            >
-                              Best Seller
+                                </div>
+                              ))}
                             </div>
-                          </div>
-                        </s-stack>
-                      ) : selectedImage === "vertical" ? (
-                        <div
-                          style={{
-                            textAlign: "center",
-                            alignItems: "center",
-                            alignContent: "center",
+                          )}
 
-                            border: `solid 2px ${borderColor}`,
-                            borderRadius: `${devBorder}px`,
-                            padding: "10px",
-                            position: "relative",
-                            backgroundColor: cardBgColor,
-                          }}
-                        >
-                          <s-stack
-                            direction="block"
-                            justifyContent="center"
-                            alignItems="center"
-                            gap="small-100"
-                          >
-                            <s-box>
-                              <s-choice-list>
-                                <s-choice
-                                  defaultSelected
-                                  value="optional"
-                                ></s-choice>
-                              </s-choice-list>
-                            </s-box>
-                            <h3
-                              style={{
-                                fontSize: `${fontSettings.cardTitle.fontSize}px`,
-                                fontWeight: fontSettings.cardTitle.fontStyle,
-                                fontStyle: fontSettings.cardTitle.italic
-                                  ? "italic"
-                                  : "normal",
-                                padding: "0px",
-                                margin: "0px",
-
-                                color: cardTitleColor,
-                              }}
-                            >
-                              Buy 2
-                            </h3>
-                            <s-box>
-                              <button
-                                style={{
-                                  fontSize: `${fontSettings.insideBadge.fontSize}px`,
-                                  fontWeight:
-                                    fontSettings.insideBadge.fontStyle,
-                                  fontStyle: fontSettings.insideBadge.italic
-                                    ? "italic"
-                                    : "normal",
-                                  backgroundColor: backgroundColor,
-                                  color: textColor,
-                                  borderRadius: "5px",
-                                  padding: "3px",
-                                }}
-                              >
-                                Best Offer
-                              </button>
-                            </s-box>
-
-                            <p
-                              style={{
-                                fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
-                                fontWeight: fontSettings.cardSubtitle.fontStyle,
-                                fontStyle: fontSettings.cardSubtitle.italic
-                                  ? "italic"
-                                  : "normal",
-                                padding: "0px",
-                                margin: "0px",
-
-                                color: cardSubtitleColor,
-                              }}
-                            >
-                              5% OFF
-                            </p>
-                            <h2
-                              style={{
-                                color: priceColor,
-                                padding: "0px",
-                                margin: "0px",
-                              }}
-                            >
-                              $19.00
-                            </h2>
-                            {comparePrice && (
-                              <p style={{ color: comparePriceColor }}>$20.00</p>
-                            )}
-
-                            <div
-                              style={{
-                                fontSize: `${fontSettings.outsideBadge.fontSize}px`,
-                                fontWeight: fontSettings.outsideBadge.fontStyle,
-                                fontStyle: fontSettings.outsideBadge.italic
-                                  ? "italic"
-                                  : "normal",
-
-                                padding: "5px",
-                                top: "-12px",
-                                borderRadius: "10px",
-                                position: "absolute",
-
-                                backgroundColor: outsideBackgroundColor,
-                                color: outsideTextColor,
-                              }}
-                            >
-                              {" "}
-                              Best Seller
-                            </div>
-                          </s-stack>
-                        </div>
-                      ) : null}
                       {switchState && (
                         <s-stack justifyContent="center" alignItems="center">
                           <h2 style={{ margin: "0px", padding: "0px" }}>
@@ -1478,7 +1558,7 @@ export default function BundleView() {
                                   flexDirection: "row",
                                   alignItems: "stretch",
                                   height: "50px",
-                                
+
                                   justifyContent: "space-between",
                                 }}
                               >
@@ -1487,7 +1567,7 @@ export default function BundleView() {
                                     <div
                                       key={product.id}
                                       style={{
-                                        flex: 1, 
+                                        flex: 1,
                                         alignItems: "center",
                                         justifyContent: "center",
                                       }}
@@ -1546,7 +1626,11 @@ export default function BundleView() {
                                     </div>
                                   ))
                                 ) : (
-                                  <s-stack direction="inline" gap="small-300" alignItems="center">
+                                  <s-stack
+                                    direction="inline"
+                                    gap="small-300"
+                                    alignItems="center"
+                                  >
                                     <s-icon type="lock" />
                                     <span>{giftSection.giftLock}</span>
                                   </s-stack>
