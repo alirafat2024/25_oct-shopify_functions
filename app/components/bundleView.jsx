@@ -28,7 +28,7 @@ export default function BundleView() {
     setSwitchState(!switchState);
   };
 
-  const handleGiftProduct = async (giftSectionId) => {
+  const handlePro = async (giftSectionId) => {
     const selected = await shopify.resourcePicker({
       type: "product",
       multiple: true,
@@ -46,7 +46,7 @@ export default function BundleView() {
     setSelectedGiftProducts(selected);
   };
 
-  const removeGiftProduct = (productId, giftSectionId) => {
+  const deletePro = (productId, giftSectionId) => {
     setGiftSections((prevSections) =>
       prevSections.map((section) =>
         section.id === giftSectionId
@@ -221,15 +221,16 @@ export default function BundleView() {
   const [displayProductImage, setDisplayProductImage] = useState(false);
   const [imageSize, setImageSize] = useState("");
   const [imageBorderRadius, setImageBorderRadius] = useState(10);
+  const [chooseDefault, setChooseDefault] = useState(false);
 
   const addOfferSection = () => {
     const newOffer = {
       id: Math.random(),
-      titleOffer,
-      subtitleOffer,
+      titleOffer: "Buy 1",
+      subtitleOffer: "5% OFF",
       defaultSelected,
-      insideBadgeText,
-      outsideBadgeText,
+      insideBadgeText: "Best Offer",
+      outsideBadgeText: "Best Seller",
       discountType,
       quantity,
       displayProductImage,
@@ -252,6 +253,152 @@ export default function BundleView() {
       setActiveIndex([...activeIndex, index]);
     }
   };
+  const updateOfferSectionField = (value, field, offerSectionId) => {
+    setOfferSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === offerSectionId
+          ? { ...section, [field]: value } // Update specific field of the section
+          : section,
+      ),
+    );
+  };
+
+  //////////////////////////////////////////////////////////
+
+  const [addUpsellProductSections, setAddUpsellProductSections] = useState([]);
+  const [upsellProducts, setUpsellProducts] = useState([]);
+  const [discountUpsell, setDiscountUpsell] = useState();
+  const [discountPerItem, setDiscountPerItem] = useState();
+  const [upsellText, setUpsellText] = useState();
+  const [selectDefault, setSelectDefault] = useState();
+
+  const handleUpsellProduct = async (upsellSectionId) => {
+    const selected = await shopify.resourcePicker({
+      type: "product",
+      multiple: true,
+    });
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    console.log(upsellSectionId);
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    setAddUpsellProductSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === upsellSectionId
+          ? { ...section, UpsellProducts: selected }
+          : section,
+      ),
+    );
+
+    setUpsellProducts(selected);
+  };
+
+  const removeUpsellProduct = (productId, upsellSectionId) => {
+    setAddUpsellProductSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === upsellSectionId
+          ? {
+              ...section,
+              UpsellProducts: section.UpsellProducts.filter(
+                (product) => product.id !== productId,
+              ),
+            }
+          : section,
+      ),
+    );
+  };
+
+  const addUpsellProductSection = () => {
+    const newUpsell = {
+      id: Math.random(),
+      discountUpsell,
+      UpsellProducts: [],
+      discountPerItem,
+      upsellText: "+ Add at 20% discount",
+      selectDefault,
+    };
+    setAddUpsellProductSections((prev) => [...prev, newUpsell]);
+  };
+
+  const removeUpsellProductSection = (id) => {
+    setAddUpsellProductSections(
+      addUpsellProductSections.filter((addProduct) => addProduct.id !== id),
+    );
+  };
+
+  const updateUpsellProductField = (value, field, upsellSectionId) => {
+    setAddUpsellProductSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === upsellSectionId
+          ? { ...section, [field]: value }
+          : section,
+      ),
+    );
+  };
+
+  //////////////////////////////////////////////////////////////////////
+
+  const [addGiftProductSections, setAddGiftProductSections] = useState([]);
+  const [giftProducts, setGiftProducts] = useState([]);
+  const [textGift, setTextGift] = useState();
+  const [selectDefaultGift, setSelectDefaultGift] = useState();
+
+  const handleMyProduct = async (giftSectionId) => {
+    const selected = await shopify.resourcePicker({
+      type: "product",
+      multiple: true,
+    });
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    console.log(giftSectionId);
+    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+    setAddGiftProductSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === giftSectionId
+          ? { ...section, giftProducts: selected }
+          : section,
+      ),
+    );
+
+    setGiftProducts(selected);
+  };
+
+  const removeMyProduct = (productId, giftSectionId) => {
+    setAddGiftProductSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === giftSectionId
+          ? {
+              ...section,
+              giftProducts: section.giftProducts.filter(
+                (product) => product.id !== productId,
+              ),
+            }
+          : section,
+      ),
+    );
+  };
+  const addGiftProductSection = () => {
+    const newGift = {
+      id: Math.random(),
+      giftProducts: [],
+      textGift: "Free Gift",
+      selectDefaultGift,
+    };
+    setAddGiftProductSections((prev) => [...prev, newGift]);
+  };
+
+  const removeGiftProductSection = (id) => {
+    setAddGiftProductSections(
+      addGiftProductSections.filter((addGift) => addGift.id !== id),
+    );
+  };
+
+  const updateGiftProductField = (value, field, giftSectionId) => {
+    setAddGiftProductSections((prevSections) =>
+      prevSections.map((section) =>
+        section.id === giftSectionId ? { ...section, [field]: value } : section,
+      ),
+    );
+  };
+  //////////////////////////////////////////////////////////////////////
+
   return (
     <s-page>
       <s-stack direction="block" gap="base">
@@ -897,7 +1044,7 @@ export default function BundleView() {
                             >
                               <s-button
                                 icon="product"
-                                onClick={() => handleGiftProduct(gift.id)}
+                                onClick={() => handlePro(gift.id)}
                               >
                                 select product
                               </s-button>
@@ -951,10 +1098,7 @@ export default function BundleView() {
                                         <s-icon
                                           type="x"
                                           onClick={() =>
-                                            removeGiftProduct(
-                                              product.id,
-                                              gift.id,
-                                            )
+                                            deletePro(product.id, gift.id)
                                           }
                                         />
                                       </s-box>
@@ -1091,6 +1235,9 @@ export default function BundleView() {
 
                       {activeIndex.includes(addSection.id) && (
                         <Offers
+                          key={addSection.id}
+                          offerSection={addSection}
+                          updateOfferSectionField={updateOfferSectionField}
                           titleOffer={titleOffer}
                           onChangeTitleOffer={setTitleOffer}
                           subtitleOffer={subtitleOffer}
@@ -1111,6 +1258,28 @@ export default function BundleView() {
                           onChangeImageSize={setImageSize}
                           imageBorderRadius={imageBorderRadius}
                           onChangeImageBorderRadius={setImageBorderRadius}
+                          addUpsellProductSections={addUpsellProductSections}
+                          addUpsellProductSection={addUpsellProductSection}
+                          removeUpsellProductSection={
+                            removeUpsellProductSection
+                          }
+                          handleUpsellProduct={handleUpsellProduct}
+                          removeUpsellProduct={removeUpsellProduct}
+                          updateUpsellProductField={updateUpsellProductField}
+                          upsellProducts={upsellProducts}
+                          discountUpsell={discountUpsell}
+                          discountPerItem={discountPerItem}
+                          upsellText={upsellText}
+                          selectDefault={selectDefault}
+                          addGiftProductSections={addGiftProductSections}
+                          addGiftProductSection={addGiftProductSection}
+                          handleMyProduct={handleMyProduct}
+                          removeMyProduct={removeMyProduct}
+                          removeGiftProductSection={removeGiftProductSection}
+                          updateGiftProductField={updateGiftProductField}
+                          giftProducts={giftProducts}
+                          textGift={textGift}
+                          selectDefaultGift={selectDefaultGift}
                         />
                       )}
                     </s-stack>
@@ -1232,7 +1401,7 @@ export default function BundleView() {
                                   borderRadius: `${devBorder}px`,
                                   padding: "10px",
                                   position: "relative",
-                                  backgroundColor: cardBgColor,
+                                  backgroundColor: "#AAF0FB",
                                 }}
                               >
                                 <s-stack
@@ -1244,66 +1413,78 @@ export default function BundleView() {
                                     gap="base"
                                     alignItems="center"
                                   >
-                                    <s-choice-list>
-                                      <s-choice
-                                        defaultSelected
-                                        value="horizontal"
-                                      />
-                                    </s-choice-list>
-                                    <s-stack
-                                      direction="inline"
-                                      gap="small-300"
-                                      alignItems="center"
+                                    <s-choice-list
+                                      onChange={(e) => {
+                                        setChooseDefault(
+                                          e.target.currentTarget.values,
+                                        );
+                                      }}
                                     >
-                                      <h3
-                                        style={{
-                                          fontSize: `${fontSettings.cardTitle.fontSize}px`,
-                                          fontWeight:
-                                            fontSettings.cardTitle.fontStyle,
-                                          fontStyle: fontSettings.cardTitle
-                                            .italic
-                                            ? "italic"
-                                            : "normal",
-                                          color: cardTitleColor,
-                                        }}
+                                      <s-choice value={chooseDefault} />
+                                    </s-choice-list>
+
+                                    <s-box>
+                                      <s-stack
+                                        direction="inline"
+                                        gap="small-300"
+                                        alignItems="center"
                                       >
-                                        {titleOffer}
-                                      </h3>
-                                      <s-box>
-                                        <button
+                                        <h3
                                           style={{
-                                            fontSize: `${fontSettings.insideBadge.fontSize}px`,
+                                            fontSize: `${fontSettings.cardTitle.fontSize}px`,
                                             fontWeight:
-                                              fontSettings.insideBadge
-                                                .fontStyle,
-                                            fontStyle: fontSettings.insideBadge
+                                              fontSettings.cardTitle.fontStyle,
+                                            fontStyle: fontSettings.cardTitle
                                               .italic
                                               ? "italic"
                                               : "normal",
-                                            backgroundColor: backgroundColor,
-                                            color: textColor,
-                                            borderRadius: "5px",
-                                            padding: "3px",
+                                            color: cardTitleColor,
+                                            padding: "0px",
+                                            margin: "0px",
                                           }}
                                         >
-                                          {insideBadgeText}
-                                        </button>
-                                      </s-box>
-                                    </s-stack>
-                                    <p
-                                      style={{
-                                        fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
-                                        fontWeight:
-                                          fontSettings.cardSubtitle.fontStyle,
-                                        fontStyle: fontSettings.cardSubtitle
-                                          .italic
-                                          ? "italic"
-                                          : "normal",
-                                        color: cardSubtitleColor,
-                                      }}
-                                    >
-                                      {subtitleOffer}
-                                    </p>
+                                          {addSection.titleOffer}
+                                        </h3>
+
+                                        <s-box>
+                                          <button
+                                            style={{
+                                              fontSize: `${fontSettings.insideBadge.fontSize}px`,
+                                              fontWeight:
+                                                fontSettings.insideBadge
+                                                  .fontStyle,
+                                              fontStyle: fontSettings
+                                                .insideBadge.italic
+                                                ? "italic"
+                                                : "normal",
+                                              backgroundColor: backgroundColor,
+                                              color: textColor,
+                                              borderRadius: "5px",
+                                              padding: "3px",
+                                            }}
+                                          >
+                                            {addSection.insideBadgeText}
+                                          </button>
+                                        </s-box>
+                                      </s-stack>
+
+                                      <p
+                                        style={{
+                                          fontSize: `${fontSettings.cardSubtitle.fontSize}px`,
+                                          fontWeight:
+                                            fontSettings.cardSubtitle.fontStyle,
+                                          fontStyle: fontSettings.cardSubtitle
+                                            .italic
+                                            ? "italic"
+                                            : "normal",
+                                          color: cardSubtitleColor,
+                                          padding: "0px",
+                                          margin: "0px",
+                                        }}
+                                      >
+                                        {addSection.subtitleOffer}
+                                      </p>
+                                    </s-box>
                                   </s-stack>
 
                                   <s-stack
@@ -1320,7 +1501,7 @@ export default function BundleView() {
                                     )}
                                   </s-stack>
                                 </s-stack>
-                                    
+
                                 {showVariantSelection && (
                                   <s-stack
                                     direction="inline"
@@ -1361,7 +1542,103 @@ export default function BundleView() {
                                     </s-box>
                                   </s-stack>
                                 )}
+                                {addUpsellProductSections.map(
+                                  (upsell) =>
+                                    upsell.UpsellProducts &&
+                                    upsell.UpsellProducts.length > 0 && (
+                                      <s-table key={upsell.id}>
+                                        {upsell.UpsellProducts.map(
+                                          (product) => (
+                                            <s-table-header-row
+                                              key={product.id}
+                                            >
+                                              <s-table-header>
+                                                <s-icon type="layout-column-1" />
+                                              </s-table-header>
 
+                                              <s-table-header>
+                                                <s-image
+                                                  src={
+                                                    product.images &&
+                                                    product.images[0]
+                                                      ? product.images[0]
+                                                          .originalSrc
+                                                      : ""
+                                                  }
+                                                  alt={product.title}
+                                                  aspectRatio="1/0.5"
+                                                  objectFit="cover"
+                                                />
+                                              </s-table-header>
+
+                                              <s-table-header>
+                                                <s-text>{product.title}</s-text>
+                                              </s-table-header>
+
+                                              <s-table-header>
+                                                <s-select>
+                                                  <s-option>
+                                                    {product.title} - $10
+                                                  </s-option>
+                                                </s-select>
+                                              </s-table-header>
+
+                                              <s-table-header>
+                                                $10.00
+                                              </s-table-header>
+                                            </s-table-header-row>
+                                          ),
+                                        )}
+                                      </s-table>
+                                    ),
+                                )}
+
+                                {addGiftProductSections.map(
+                                  (addGift) =>
+                                    addGift.giftProducts &&
+                                    addGift.giftProducts.length > 0 && (
+                                      <s-table key={addGift.id}>
+                                        {addGift.giftProducts.map((product) => (
+                                          <s-table-header-row key={product.id}>
+                                            <s-table-header>
+                                              <s-icon type="layout-column-1" />
+                                            </s-table-header>
+
+                                            <s-table-header>
+                                              <s-image
+                                                src={
+                                                  product.images &&
+                                                  product.images[0]
+                                                    ? product.images[0]
+                                                        .originalSrc
+                                                    : ""
+                                                }
+                                                alt={product.title}
+                                                aspectRatio="1/0.5"
+                                                objectFit="cover"
+                                              />
+                                            </s-table-header>
+
+                                            <s-table-header>
+                                              <s-text>{product.title}</s-text>
+                                            </s-table-header>
+
+                                            <s-table-header>
+                                              <s-select>
+                                                <s-option>
+                                                  {product.title} - $10
+                                                </s-option>
+                                              </s-select>
+                                            </s-table-header>
+
+                                            <s-table-header>
+                                              $10.00
+                                            </s-table-header>
+                                          </s-table-header-row>
+                                        ))}
+                                      </s-table>
+                                    ),
+                                )}
                                 <div
                                   style={{
                                     fontSize: `${fontSettings.outsideBadge.fontSize}px`,
@@ -1382,7 +1659,7 @@ export default function BundleView() {
                                     color: outsideTextColor,
                                   }}
                                 >
-                                  {outsideBadgeText}
+                                  {addSection.outsideBadgeText}
                                 </div>
                               </div>
                             </s-stack>
@@ -1439,8 +1716,8 @@ export default function BundleView() {
                                     <h3
                                       style={{
                                         width: "100%",
-                                        justifyContent:"center",
-                                        alignItems:"center",
+                                        justifyContent: "center",
+                                        alignItems: "center",
                                         fontSize: `${fontSettings.cardTitle.fontSize}px`,
                                         fontWeight:
                                           fontSettings.cardTitle.fontStyle,

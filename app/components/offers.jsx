@@ -1,5 +1,6 @@
 import { useState } from "react";
-import  ImageUploadWithPreview  from "./fileUpload"
+import ImageUploadWithPreview from "./fileUpload";
+
 export const Offers = ({
   titleOffer,
   onChangeTitleOffer,
@@ -21,145 +22,31 @@ export const Offers = ({
   onChangeImageSize,
   imageBorderRadius,
   onChangeImageBorderRadius,
- 
+
+  addUpsellProductSections,
+  addUpsellProductSection,
+  removeUpsellProductSection,
+  removeUpsellProduct,
+  updateUpsellProductField,
+  upsellProducts,
+  discountUpsell,
+  discountPerItem,
+  upsellText,
+  selectDefault,
+  handleUpsellProduct,
+
+  addGiftProductSections,
+  addGiftProductSection,
+  removeGiftProductSection,
+  updateGiftProductField,
+  giftProducts,
+  textGift,
+  selectDefaultGift,
+  handleMyProduct,
+  removeMyProduct,
+  offerSection,
+  updateOfferSectionField,
 }) => {
-  //////////////////////////////////////////////////////////
-  const [addUpsellProductSections, setAddUpsellProductSections] = useState([]);
-  const [upsellProducts, setUpsellProducts] = useState([]);
-  const [discountUpsell, setDiscountUpsell] = useState();
-  const [discountPerItem, setDiscountPerItem] = useState();
-  const [upsellText, setUpsellText] = useState();
-  const [selectDefault, setSelectDefault] = useState();
-
-  const handleUpsellProduct = async (upsellSectionId) => {
-    const selected = await shopify.resourcePicker({
-      type: "product",
-      multiple: true,
-    });
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    console.log(upsellSectionId);
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    setAddUpsellProductSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === upsellSectionId
-          ? { ...section, UpsellProducts: selected }
-          : section,
-      ),
-    );
-
-    setUpsellProducts(selected);
-  };
-
-  const removeUpsellProduct = (productId, upsellSectionId) => {
-    setAddUpsellProductSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === upsellSectionId
-          ? {
-              ...section,
-              UpsellProducts: section.UpsellProducts.filter(
-                (product) => product.id !== productId,
-              ),
-            }
-          : section,
-      ),
-    );
-  };
-
-  const addUpsellProductSection = () => {
-    const newUpsell = {
-      id: Math.random(),
-      discountUpsell,
-      UpsellProducts: [],
-      discountPerItem,
-      upsellText: "+ Add at 20% discount",
-      selectDefault,
-    };
-    setAddUpsellProductSections((prev) => [...prev, newUpsell]);
-  };
-
-  const removeUpsellProductSection = (id) => {
-    setAddUpsellProductSections(
-      addUpsellProductSections.filter((addProduct) => addProduct.id !== id),
-    );
-  };
-
-  const updateUpsellProductField = (value, field, upsellSectionId) => {
-    setAddUpsellProductSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === upsellSectionId
-          ? { ...section, [field]: value }
-          : section,
-      ),
-    );
-  };
-
-  //////////////////////////////////////////////////////////////////////
-
-  const [addGiftProductSections, setAddGiftProductSections] = useState([]);
-  const [giftProducts, setGiftProducts] = useState([]);
-  const [textGift, setTextGift] = useState();
-  const [selectDefaultGift, setSelectDefaultGift] = useState();
-
-  const handleGiftProduct = async (giftSectionId) => {
-    const selected = await shopify.resourcePicker({
-      type: "product",
-      multiple: true,
-    });
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    console.log(giftSectionId);
-    console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    setAddGiftProductSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === giftSectionId
-          ? { ...section, giftProducts: selected }
-          : section,
-      ),
-    );
-
-    setGiftProducts(selected);
-  };
-
-  const removeGiftProduct = (productId, giftSectionId) => {
-    setAddGiftProductSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === giftSectionId
-          ? {
-              ...section,
-              UpsellProducts: section.giftProducts.filter(
-                (product) => product.id !== productId,
-              ),
-            }
-          : section,
-      ),
-    );
-  };
-
-  const addGiftProductSection = () => {
-    const newGift = {
-      id: Math.random(),
-      giftProducts: [],
-      textGift: "Free Gift",
-      selectDefaultGift,
-    };
-    setAddGiftProductSections((prev) => [...prev, newGift]);
-  };
-
-  const removeGiftProductSection = (id) => {
-    setAddGiftProductSections(
-      addGiftProductSections.filter((addGift) => addGift.id !== id),
-    );
-  };
-
-  const updateGiftProductField = (value, field, giftSectionId) => {
-    setAddGiftProductSections((prevSections) =>
-      prevSections.map((section) =>
-        section.id === giftSectionId ? { ...section, [field]: value } : section,
-      ),
-    );
-  };
-  //////////////////////////////////////////////////////////////////////
-
-  ////////////////////////////////////////////////////////
   return (
     <s-stack gap="small-100">
       <s-stack gap="small-100">
@@ -167,9 +54,13 @@ export const Offers = ({
           <s-box InlineSize="250px">
             <s-text-field
               label="Titel"
-              value={titleOffer}
+              value={offerSection.titleOffer}
               onChange={(e) => {
-                onChangeTitleOffer(e.target.value);
+                updateOfferSectionField(
+                  e.target.value,
+                  "titleOffer",
+                  offerSection.id,
+                );
               }}
             />
           </s-box>
@@ -177,9 +68,13 @@ export const Offers = ({
             <s-text-field
               label="Subtitle"
               details="This will be displayed as discount name!"
-              value={subtitleOffer}
+              value={offerSection.subtitleOffer}
               onChange={(e) => {
-                onChangeSubtitleOffer(e.target.value);
+                updateOfferSectionField(
+                  e.target.value,
+                  "subtitleOffer",
+                  offerSection.id,
+                );
               }}
             />
           </s-box>
@@ -188,9 +83,13 @@ export const Offers = ({
           <s-box maxInlineSize="150px">
             <s-checkbox
               label="Default selected"
-              checked={defaultSelected}
+              checked={offerSection.defaultSelected}
               onChange={(e) => {
-                onChangeDefaultSelected(e.target.value);
+                updateOfferSectionField(
+                  e.target.value,
+                  "defaultSelected",
+                  offerSection.id,
+                );
               }}
             />
           </s-box>
@@ -198,18 +97,26 @@ export const Offers = ({
             <s-box maxInlineSize="170px">
               <s-text-field
                 label="Inside badge text"
-                value={insideBadgeText}
+                value={offerSection.insideBadgeText}
                 onChange={(e) => {
-                  onChangeInsideBadgeText(e.target.value);
+                  updateOfferSectionField(
+                    e.target.value,
+                    "insideBadgeText",
+                    offerSection.id,
+                  );
                 }}
               />
             </s-box>
             <s-box maxInlineSize="170px">
               <s-text-field
                 label="Outside badge text"
-                value={outsideBadgeText}
+                value={offerSection.outsideBadgeText}
                 onChange={(e) => {
-                  onChangeOutSideBadgeText(e.target.value);
+                  updateOfferSectionField(
+                    e.target.value,
+                    "outsideBadgeText",
+                    offerSection.id,
+                  );
                 }}
               />
             </s-box>
@@ -228,9 +135,13 @@ export const Offers = ({
         <s-box InlineSize="160px">
           <s-select
             label="Discount type"
-            value={discountType}
+            value={offerSection.discountType}
             onChange={(e) => {
-              onChangeDiscountType(e.target.value);
+              updateOfferSectionField(
+                e.target.value,
+                "discountType",
+                offerSection.id,
+              );
             }}
           >
             <s-option>Regular price</s-option>
@@ -240,9 +151,13 @@ export const Offers = ({
         </s-box>
         <s-box InlineSize="160px">
           <s-number-field
-            value={quantity}
+            value={offerSection.quantity}
             onChange={(e) => {
-              onChangeQuantity(e.target.value);
+              updateOfferSectionField(
+                e.target.value,
+                "quantity",
+                offerSection.id,
+              );
             }}
             label="Quantity"
             placeholder="0"
@@ -264,25 +179,33 @@ export const Offers = ({
       </s-stack>
       <s-stack direction="inline" justifyContent="space-between">
         <s-box inlineSize="250px">
-         
-          <ImageUploadWithPreview/>
+          <ImageUploadWithPreview />
         </s-box>
         <s-stack gap="small-300">
           <s-box InlineSize="250px">
-            <s-checkbox label="Display product image"
-            checked={displayProductImage}
-            onChange={(e)=>{
-              onChangeDisplayProductImage(e.target.value)
-            }}
+            <s-checkbox
+              label="Display product image"
+              checked={offerSection.displayProductImage}
+              onChange={(e) => {
+                updateOfferSectionField(
+                  e.target.value,
+                  "displayProductImage",
+                  offerSection.id,
+                );
+              }}
             />
           </s-box>
           <s-box InlineSize="250px">
-            <s-text>Size ({imageSize}px)</s-text>
+            <s-text>Size ({offerSection.imageSize}px)</s-text>
             <input
-               value={imageSize}
-               onChange={(e)=>{
-                onChangeImageSize(e.target.value)
-               }}
+              value={offerSection.imageSize}
+              onChange={(e) => {
+                updateOfferSectionField(
+                  e.target.value,
+                  "imageSize",
+                  offerSection.id,
+                );
+              }}
               type="range"
               min={0}
               max={100}
@@ -291,12 +214,16 @@ export const Offers = ({
             />
           </s-box>
           <s-box InlineSize="250px">
-            <s-text>Radius ({imageBorderRadius}px)</s-text>
+            <s-text>Radius ({offerSection.imageBorderRadius}px)</s-text>
             <input
-             value={imageBorderRadius}
-             onChange={(e)=>{
-              onChangeImageBorderRadius(e.target.value)
-             }}
+              value={offerSection.imageBorderRadius}
+              onChange={(e) => {
+                updateOfferSectionField(
+                  e.target.value,
+                  "imageBorderRadius",
+                  offerSection.id,
+                );
+              }}
               type="range"
               min={0}
               max={100}
@@ -464,7 +391,7 @@ export const Offers = ({
                 </s-stack>
                 <s-button
                   icon="product-add"
-                  onClick={() => handleGiftProduct(addGift.id)}
+                  onClick={() => handleMyProduct(addGift.id)}
                 >
                   Select Product
                 </s-button>
@@ -501,9 +428,9 @@ export const Offers = ({
                       <s-box>
                         <s-icon
                           type="x"
-                          onClick={() =>
-                            removeGiftProduct(product.id, addGift.id)
-                          }
+                          onClick={() => {
+                            removeMyProduct(product.id, addGift.id);
+                          }}
                         />
                       </s-box>
                     </s-stack>
