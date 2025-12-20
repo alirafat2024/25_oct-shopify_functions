@@ -28,7 +28,6 @@ export const Offers = ({
   removeUpsellProductSection,
   removeUpsellProduct,
   updateUpsellProductField,
-  upsellProducts,
   discountUpsell,
   discountPerItem,
   upsellText,
@@ -266,7 +265,7 @@ export const Offers = ({
                 </s-stack>
                 <s-button
                   icon="product-add"
-                  onClick={() => handleUpsellProduct(upsell.id)}
+                  onClick={() => handleUpsellProduct(upsell.id,offerSection.id)}
                 >
                   Select Product
                 </s-button>
@@ -304,7 +303,7 @@ export const Offers = ({
                         <s-icon
                           type="x"
                           onClick={() =>
-                            removeUpsellProduct(product.id, upsell.id)
+                            removeUpsellProduct(product.id, upsell.id,offerSection.id)
                           }
                         />
                       </s-box>
@@ -391,7 +390,7 @@ export const Offers = ({
                 </s-stack>
                 <s-button
                   icon="product-add"
-                  onClick={() => handleMyProduct(addGift.id)}
+                  onClick={() => handleMyProduct(addGift.id,offerSection.id)}
                 >
                   Select Product
                 </s-button>
@@ -429,7 +428,7 @@ export const Offers = ({
                         <s-icon
                           type="x"
                           onClick={() => {
-                            removeMyProduct(product.id, addGift.id);
+                            removeMyProduct(product.id, addGift.id,offerSection.id);
                           }}
                         />
                       </s-box>
