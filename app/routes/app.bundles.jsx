@@ -5,6 +5,32 @@ import { authenticate } from "../shopify.server";
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
 
+  const getResponse = await admin.graphql(
+    `#graphql
+    query {
+      metaobjects(type: "MyBundle", first: 50) {
+        edges {
+          node {
+            id
+            type
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
+    }`,
+  );
+
+  const getData = await getResponse.json();
+
+  const meta = getData.data.metaobjects.edges.map((edge) => edge.node);
+
+  console.log("ooooooooooooooooooooooooooooooooooooooooooooooooo");
+  console.log(meta);
+  console.log("ooooooooooooooooooooooooooooooooooooooooooooooooo");
+
   const response = await admin.graphql(
     `#graphql
       mutation CreateBundleMetaobjectDefinition($definition: MetaobjectDefinitionCreateInput!) {
@@ -25,12 +51,12 @@ export const loader = async ({ request }) => {
     {
       variables: {
         definition: {
-          name: "bundle_definition1",
-          type: "bundle_definition1",
+          name: "MyBundle",
+          type: "MyBundle",
           fieldDefinitions: [
-            { name: "Name", key: "name", type: "single_line_text_field" },
-            { name: "Data", key: "data", type: "json" },
-            { name: "CreatedAt", key: "created_at", type: "date_time" },
+            { name: "name", key: "name", type: "single_line_text_field" },
+            { name: "data", key: "data", type: "json" },
+            { name: "created_at", key: "created_at", type: "date_time" },
           ],
         },
       },
@@ -105,41 +131,55 @@ export const loader = async ({ request }) => {
   }
 
   return {
-    metaobjectDefinition,
     metafieldDefinition,
-    errors: [...userErrors, ...metafieldErrors],
+    metafieldErrors,
+    meta,
   };
 };
 
 export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
-
   const formData = await request.formData();
 
+  // Form data extraction
   const name = formData.get("name");
-  const data = formData.get("data");
-  const createdAt = formData.get("create_at");
-  const metaobjectId = formData.get("metaobjectId");
+  const data = JSON.parse(formData.get("data"));
+  const actionType = formData.get("type");
+  const createAt = formData.get("create_at");
+  const productID =
+    data.resource && data.resource.length > 0
+      ? data.resource.map((product) => product.id)
+      : [];
+  const productIds = productID[0];
+  console.log("hhhhhhhhhhhhhhhhhhhhhhhhhh");
+  console.log("Product IDs:", productIds);
+  console.log("hhhhhhhhhhhhhhhhhhhhhhhhhh");
+
   console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
   console.log(name);
-  console.log(createdAt);
   console.log(data);
-  console.log(metaobjectId);
+  console.log(actionType);
+  console.log(createAt);
 
   console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-  // CREATE
 
-  const createResponse = await admin.graphql(
-    `#graphql
+  const fieldsArr = [
+    { key: "name", value: name },
+    { key: "data", value: JSON.stringify(data) },
+    { key: "created_at", value: new Date().toISOString() },
+  ].filter((f) => f.value !== undefined && f.value !== null);
+
+  // CREATE: Create a new metaobject
+  if (actionType === "create") {
+    const createResponse = await admin.graphql(
+      `#graphql
       mutation {
         metaobjectCreate(metaobject: {
-          type: "bundle_definition1",
-             fields: [
-             { key: "name", value: "${name}" },
-            { key: "data", value: "${data}" },
-            { key: "created_at", value: "${createdAt}" },
-
-          ],
+          type: "MyBundle",
+          fields: [
+            ${fieldsArr.map((f) => `{ key: "${f.key}", value: """${f.value}""" }`).join(",\n")}
+          ]
         }) {
           metaobject {
             id
@@ -149,13 +189,69 @@ export const action = async ({ request }) => {
           userErrors { field message code }
         }
       }`,
-  );
-  const createData = await createResponse.json();
-  if (createData.data.metaobjectCreate.userErrors.length > 0) {
-    return { errors: createData.data.metaobjectCreate.userErrors };
+    );
+
+    const createData = await createResponse.json();
+    const createPayload = createData.data.metaobjectCreate;
+    const metaobject = createPayload.metaobject;
+    const bundleMetaobjectId = metaobject.id;
+    console.log("lllllllllllllllllllllllllllllll");
+    console.log(bundleMetaobjectId);
+    console.log("lllllllllllllllllllllllllllllll");
+
+    if (createData.data.metaobjectCreate.userErrors.length > 0) {
+      return { errors: createData.data.metaobjectCreate.userErrors };
+    }
+
+    const response = await admin.graphql(
+      `#graphql
+      mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          metafields {
+            key
+            namespace
+            value
+            createdAt
+            updatedAt
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+      `,
+      {
+        variables: {
+          metafields: [
+            {
+              key: "bundle",
+              namespace: "custom",
+              ownerId: productIds,
+              type: "metaobject_reference",
+              value: bundleMetaobjectId,
+            },
+          ],
+        },
+      },
+    );
+
+    const Metadata = await response.json();
+    const payload = Metadata?.data?.metafieldsSet;
+    const metafields = payload?.metafields ?? [];
+    const userErrors = payload?.userErrors ?? [];
+
+    if (userErrors.length > 0) {
+      return { errors: userErrors };
+    }
+
+    return { metafields, metaobject: metaobject };
   }
-  return { metaobject: createData.data.metaobjectCreate.metaobject };
+
+  return { error: "Invalid action type or missing metaobjectId" };
 };
+
 export default function BundleViewPage() {
   return <BundleView />;
 }

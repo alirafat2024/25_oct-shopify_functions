@@ -5,6 +5,7 @@ import { Offers } from "./offers";
 import { FiBox } from "react-icons/fi";
 import { useFetcher } from "react-router";
 import { Form } from "react-router";
+import { useLoaderData } from "react-router";
 export default function BundleView() {
   const fetcher = useFetcher();
 
@@ -181,6 +182,10 @@ export default function BundleView() {
   const [products, setProducts] = useState([]);
   const [bundleName, setBundleName] = useState();
   const [title, setTitle] = useState();
+  const { meta } = useLoaderData();
+  console.log("pppppppppppppppppppppppppppppp");
+  console.log(meta);
+  console.log("pppppppppppppppppppppppppppppp");
 
   const handleImageSelect = (image) => {
     setSelectedImage(image);
@@ -223,25 +228,38 @@ export default function BundleView() {
       hour12: true,
     }).format(d);
   };
-  const data = {
-    name: bundleName,
-    title: title,
-    resource: JSON.stringify(products),
-  };
 
   /////////////////handle submit///////////////////////////////
   const handleSubmit = () => {
     const createAt = formatFullDate(new Date());
+
+    const data = {
+      name: bundleName,
+      title: title,
+      resource: products,
+    };
+
+    if (
+      !data.name ||
+      !data.title ||
+      !data.resource ||
+      data.resource.length === 0
+    ) {
+      console.error("Form is incomplete. Missing required data.");
+      return;
+    }
+
     fetcher.submit(
       {
-      name: bundleName,
-        data: data,
-
+        name: bundleName,
+        data: JSON.stringify(data),
         create_at: createAt,
+        type: "create",
       },
       { method: "POST" },
     );
   };
+
   /////////////////////////////////////////
   /////////////////////////////////////////////////////////////
 
