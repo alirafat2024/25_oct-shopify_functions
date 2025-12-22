@@ -3,11 +3,12 @@ import { ColorPickerField } from "./ColorPickerField";
 import { SelectField } from "./selectField";
 import { Offers } from "./offers";
 import { FiBox } from "react-icons/fi";
-import { useFetcher } from "react-router";
+import { useFetcher, useLoaderData,useParams} from "react-router";
 import { Form } from "react-router";
-import { useLoaderData } from "react-router";
+
 export default function BundleView() {
   const fetcher = useFetcher();
+  
 
   //////////Progressive Gifts/////////////////
 
@@ -113,7 +114,7 @@ export default function BundleView() {
   ];
 
   //////////////////////////////////////////
-  // Card Colors
+  // Style
   const [titleColor, setTitleColor] = useState("#000000");
   const [lineleColor, setLineColor] = useState("#AAF0FB");
   const [cardBgColor, setCardBgColor] = useState("#FFFFFF");
@@ -123,6 +124,7 @@ export default function BundleView() {
   const [priceColor, setPriceColor] = useState("#000000");
   const [comparePriceColor, setComparePriceColor] = useState("#808080");
   const [borderColor, setBorderColor] = useState("#CCCCCC");
+  const [atcButtonText, setAtcButtonText] = useState("Add To Card");
   //  Inside Badge Colors
   const [textColor, setTextColor] = useState("#FFFFFF");
   const [backgroundColor, setBackgroundColor] = useState("#000000");
@@ -170,6 +172,9 @@ export default function BundleView() {
   };
 
   ///////////////////////////////////////////////////////
+
+  const loaderData = useLoaderData();
+const { bundleId } = useParams(); 
   const [devBorder, setDevBorder] = useState(5);
   const [selectedImage, setSelectedImage] = useState("horizontal");
   const [activeIndex, setActiveIndex] = useState([]);
@@ -181,11 +186,8 @@ export default function BundleView() {
   const [comparePrice, setComparePrice] = useState(false);
   const [products, setProducts] = useState([]);
   const [bundleName, setBundleName] = useState();
-  const [title, setTitle] = useState();
-  const { meta } = useLoaderData();
-  console.log("pppppppppppppppppppppppppppppp");
-  console.log(meta);
-  console.log("pppppppppppppppppppppppppppppp");
+  const [title, setTitle] = useState("Bundle & Save");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleImageSelect = (image) => {
     setSelectedImage(image);
@@ -230,7 +232,8 @@ export default function BundleView() {
   };
 
   /////////////////handle submit///////////////////////////////
-  const handleSubmit = () => {
+
+  const handleSubmit = async () => {
     const createAt = formatFullDate(new Date());
 
     const data = {
@@ -249,15 +252,28 @@ export default function BundleView() {
       return;
     }
 
-    fetcher.submit(
-      {
-        name: bundleName,
-        data: JSON.stringify(data),
-        create_at: createAt,
-        type: "create",
-      },
-      { method: "POST" },
-    );
+    try {
+      await fetcher.submit(
+        {
+          name: bundleName,
+          data: JSON.stringify(data),
+          create_at: createAt,
+          type: "create",
+        },
+        { method: "POST" },
+      );
+
+      setBundleName("");
+      setTitle("");
+      setProducts([]);
+      setSuccessMessage("Data submitted successfully!");
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+    } catch (error) {
+      console.error("Submission failed", error);
+    }
   };
 
   /////////////////////////////////////////
@@ -710,6 +726,21 @@ export default function BundleView() {
                         </s-stack>
                       )}
                     </s-stack>
+                    {successMessage && (
+                      <div
+                        style={{
+                          backgroundColor: "#d4edda",
+                          color: "#155724",
+                          padding: "15px",
+                          border: "1px solid #c3e6cb",
+                          borderRadius: "5px",
+                          marginBottom: "10px",
+                          animation: "fadeIn 0.5s ease-out",
+                        }}
+                      >
+                        <p style={{ margin: 0 }}>{successMessage}</p>
+                      </div>
+                    )}
                   </s-section>
                   {/* Style*/}
                   <s-section>
@@ -993,7 +1024,13 @@ export default function BundleView() {
                           <s-stack gap="small-100">
                             <s-stack direction="inline" gap="large-300">
                               <s-box inlineSize="200px">
-                                <s-text-field label="Text" />
+                                <s-text-field
+                                  label="Text"
+                                  value={atcButtonText}
+                                  onChange={(e) => {
+                                    setAtcButtonText(e.target.value);
+                                  }}
+                                />
                               </s-box>
                               <s-stack direction="inline" gap="small-300">
                                 <ColorPickerField
@@ -1503,7 +1540,7 @@ export default function BundleView() {
                               color: titleColor,
                             }}
                           >
-                            Bundle & Save
+                            {title}
                           </h2>
 
                           <div
@@ -2262,7 +2299,7 @@ export default function BundleView() {
                               borderRadius: `${borderRadiusButton}px`,
                             }}
                           >
-                            Add To Card
+                            {atcButtonText}
                           </button>
                         </s-stack>
                       </s-stack>

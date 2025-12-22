@@ -12,7 +12,6 @@ export const loader = async ({ request }) => {
         edges {
           node {
             id
-            type
             fields {
               key
               value
@@ -25,11 +24,31 @@ export const loader = async ({ request }) => {
 
   const getData = await getResponse.json();
 
-  const meta = getData.data.metaobjects.edges.map((edge) => edge.node);
+  const safeJsonParse = (value) => {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      return value;
+    }
+  };
 
-  console.log("ooooooooooooooooooooooooooooooooooooooooooooooooo");
-  console.log(meta);
-  console.log("ooooooooooooooooooooooooooooooooooooooooooooooooo");
+  const dataOj = getData.data.metaobjects.edges.map((edge) => {
+    const node = edge.node;
+
+    const parsedData = node.fields.reduce((acc, { key, value }) => {
+      acc[key] = value ? safeJsonParse(value) : null;
+      return acc;
+    }, {});
+
+    return {
+      id: node.id,
+      dataOj: parsedData,
+    };
+  });
+
+  console.log(".........................................................");
+  console.log(dataOj);
+  console.log(".........................................................");
 
   const response = await admin.graphql(
     `#graphql
@@ -133,7 +152,7 @@ export const loader = async ({ request }) => {
   return {
     metafieldDefinition,
     metafieldErrors,
-    meta,
+    dataOj,
   };
 };
 
@@ -146,6 +165,7 @@ export const action = async ({ request }) => {
   const data = JSON.parse(formData.get("data"));
   const actionType = formData.get("type");
   const createAt = formData.get("create_at");
+  const metaobjectId = formData.get("metaobjectId");
   const productID =
     data.resource && data.resource.length > 0
       ? data.resource.map((product) => product.id)
@@ -247,6 +267,31 @@ export const action = async ({ request }) => {
     }
 
     return { metafields, metaobject: metaobject };
+  }
+
+  if (actionType === "update" && metaobjectId) {
+    const updateResponse = await admin.graphql(
+      `#graphql
+      mutation {
+        metaobjectUpdate(id: "${metaobjectId}", metaobject: {
+          fields: [
+            ${fieldsArr.map((f) => `{ key: "${f.key}", value: """${f.value}""" }`).join(",\n")}
+          ]
+        }) {
+          metaobject {
+            id
+            type
+            fields { key value }
+          }
+          userErrors { field message code }
+        }
+      }`,
+    );
+    const updateData = await updateResponse.json();
+    if (updateData.data.metaobjectUpdate.userErrors.length > 0) {
+      return { errors: updateData.data.metaobjectUpdate.userErrors };
+    }
+    return { metaobject: updateData.data.metaobjectUpdate.metaobject };
   }
 
   return { error: "Invalid action type or missing metaobjectId" };
