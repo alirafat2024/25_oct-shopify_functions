@@ -520,11 +520,11 @@ export default function EditBundlePage() {
         console.log("Found bundleData:", bundleData);
         console.log("bundleData.data:", bundleData.data);
 
-        setShowVariantSelection(bundleData.data.showVariantSelection);
-        setShowVariantImg(bundleData.data.showVariantImag);
-        setVariantImagSizeValue(bundleData.data.variantImagSizeValue);
-        setVariantImagRadiusValue(bundleData.data.variantImagRadiusValue);
-        setComparePrice(bundleData.data.comparePrice);
+        setShowVariantSelection(bundleData.data.data.showVariantSelection);
+        setShowVariantImg(bundleData.data.data.showVariantImag);
+        setVariantImagSizeValue(bundleData.data.data.variantImagSizeValue);
+        setVariantImagRadiusValue(bundleData.data.data.variantImagRadiusValue);
+        setComparePrice(bundleData.data.data.comparePrice);
         setBundleName(bundleData.data.name || "");
         setTitle(bundleData.data.data.title || "Bundle & Save");
         setProducts(bundleData.data.data.resource || []);
@@ -1761,46 +1761,53 @@ export default function EditBundlePage() {
                                   </s-stack>
 
                                   {showVariantSelection && (
-                                    <s-stack
-                                      direction="inline"
-                                      gap="small-300"
-                                      alignItems="center"
-                                    >
-                                      <s-box>
-                                        <s-button variant="primary">
-                                          #1
-                                        </s-button>
-                                      </s-box>
-                                      {showVariantImag && (
-                                        <div
-                                          style={{
-                                            color: "gray",
-                                            backgroundColor:
-                                              "rgba(241, 241, 241, 1)",
-                                            padding: `${variantImagSizeValue}px`,
-                                            margin: "0px",
-                                            borderRadius: `${variantImagRadiusValue}px`,
-                                            alignItems: "center",
-                                            textAlign: "center",
-                                          }}
-                                        >
-                                          <FiBox
-                                            style={{
-                                              width: "15px",
-                                              height: "15px",
-                                            }}
-                                          />
-                                        </div>
+                                    <div>
+                                      {Array.from({ ength: index + 1  }).map(
+                                        (_, variantIdx) => (
+                                          <s-stack
+                                            direction="inline"
+                                            gap="small-300"
+                                            alignItems="center"
+                                            key={variantIdx}
+                                          >
+                                            <s-box>
+                                              <s-button variant="primary">
+                                                #{index + 1}
+                                              </s-button>
+                                            </s-box>
+                                            {showVariantImag && (
+                                              <div
+                                                style={{
+                                                  color: "gray",
+                                                  backgroundColor:
+                                                    "rgba(241, 241, 241, 1)",
+                                                  padding: `${variantImagSizeValue}px`,
+                                                  margin: "0px",
+                                                  borderRadius: `${variantImagRadiusValue}px`,
+                                                  alignItems: "center",
+                                                  textAlign: "center",
+                                                }}
+                                              >
+                                                <FiBox
+                                                  style={{
+                                                    width: "15px",
+                                                    height: "15px",
+                                                  }}
+                                                />
+                                              </div>
+                                            )}
+                                            <s-box inlineSize="100px">
+                                              <s-select>
+                                                <s-option>$10</s-option>
+                                                <s-option>$25</s-option>
+                                                <s-option>$50</s-option>
+                                                <s-option>$100</s-option>
+                                              </s-select>
+                                            </s-box>
+                                          </s-stack>
+                                        ),
                                       )}
-                                      <s-box inlineSize="100px">
-                                        <s-select>
-                                          <s-option>$10</s-option>
-                                          <s-option>$25</s-option>
-                                          <s-option>$50</s-option>
-                                          <s-option>$100</s-option>
-                                        </s-select>
-                                      </s-box>
-                                    </s-stack>
+                                    </div>
                                   )}
 
                                   {addSection.upsellProductdd &&
