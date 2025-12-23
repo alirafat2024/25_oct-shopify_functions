@@ -4,52 +4,6 @@ import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
-
-  const getResponse = await admin.graphql(
-    `#graphql
-    query {
-      metaobjects(type: "MyBundle", first: 50) {
-        edges {
-          node {
-            id
-            fields {
-              key
-              value
-            }
-          }
-        }
-      }
-    }`,
-  );
-
-  const getData = await getResponse.json();
-
-  const safeJsonParse = (value) => {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      return value;
-    }
-  };
-
-  const dataOj = getData.data.metaobjects.edges.map((edge) => {
-    const node = edge.node;
-
-    const parsedData = node.fields.reduce((acc, { key, value }) => {
-      acc[key] = value ? safeJsonParse(value) : null;
-      return acc;
-    }, {});
-
-    return {
-      id: node.id,
-      dataOj: parsedData,
-    };
-  });
-
-  console.log(".........................................................");
-  console.log(dataOj);
-  console.log(".........................................................");
-
   const response = await admin.graphql(
     `#graphql
       mutation CreateBundleMetaobjectDefinition($definition: MetaobjectDefinitionCreateInput!) {
@@ -152,7 +106,6 @@ export const loader = async ({ request }) => {
   return {
     metafieldDefinition,
     metafieldErrors,
-    dataOj,
   };
 };
 
@@ -267,31 +220,6 @@ export const action = async ({ request }) => {
     }
 
     return { metafields, metaobject: metaobject };
-  }
-
-  if (actionType === "update" && metaobjectId) {
-    const updateResponse = await admin.graphql(
-      `#graphql
-      mutation {
-        metaobjectUpdate(id: "${metaobjectId}", metaobject: {
-          fields: [
-            ${fieldsArr.map((f) => `{ key: "${f.key}", value: """${f.value}""" }`).join(",\n")}
-          ]
-        }) {
-          metaobject {
-            id
-            type
-            fields { key value }
-          }
-          userErrors { field message code }
-        }
-      }`,
-    );
-    const updateData = await updateResponse.json();
-    if (updateData.data.metaobjectUpdate.userErrors.length > 0) {
-      return { errors: updateData.data.metaobjectUpdate.userErrors };
-    }
-    return { metaobject: updateData.data.metaobjectUpdate.metaobject };
   }
 
   return { error: "Invalid action type or missing metaobjectId" };

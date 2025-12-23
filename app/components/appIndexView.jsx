@@ -15,7 +15,7 @@ export default function AppIndexView() {
     console.log(item.data.data.title);
     console.log("/////////////////////////////////////////////////////");
     const createdAt = item.data.data.created_at;
-    const name = item.data.name;
+    const name = `${item.data.name}(copy)`;
     const title = item.data.data.title;
 
     const resource =
@@ -49,6 +49,21 @@ export default function AppIndexView() {
         console.error("Error duplicating bundle:", error);
       });
   };
+  ////////////////////////////////////////
+  const formatFullDate = (date) => {
+    const d = new Date(date);
+
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+  };
+
+  //////////////////////////////////////
 
   return (
     <s-stack>
@@ -58,7 +73,7 @@ export default function AppIndexView() {
           Create bundle
         </s-button>
       </s-stack>
- 
+
       <s-stack gap="base">
         <s-stack direction="inline" gap="base">
           <s-section>
@@ -187,11 +202,11 @@ export default function AppIndexView() {
                           </s-text>
                         </s-badge>
 
-                        <s-badge tone="enabled">
+                        {/* <s-badge tone="enabled">
                           <s-text variant="bodyXs" fontWeight="regular">
                             Expired
                           </s-text>
-                        </s-badge>
+                        </s-badge> */}
                       </s-stack>
                     </s-table-cell>
 
@@ -231,7 +246,7 @@ export default function AppIndexView() {
 
                     {/* Created At Cell */}
                     <s-table-cell>
-                      <s-text>{item.data.created_at}</s-text>
+                      <s-text>{formatFullDate(item.data.created_at)}</s-text>
                     </s-table-cell>
 
                     {/* Action Cell */}
@@ -244,7 +259,9 @@ export default function AppIndexView() {
                       >
                         <s-button
                           icon="edit"
-                          onClick={() => navigate(`/app/bundles/`)}
+                          onClick={() =>
+                            navigate(`/app/bundles/${item.id.split("/").pop()}`)
+                          }
                         />
                         <s-button
                           icon="duplicate"

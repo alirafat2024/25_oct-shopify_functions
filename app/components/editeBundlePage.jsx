@@ -3,12 +3,17 @@ import { ColorPickerField } from "./ColorPickerField";
 import { SelectField } from "./selectField";
 import { Offers } from "./offers";
 import { FiBox } from "react-icons/fi";
-import { useFetcher } from "react-router";
+
 import { Form } from "react-router";
+import {
+  useFetcher,
+  useLoaderData,
+  useNavigate,
+  useParams,
+} from "react-router";
 
-export default function BundleView() {
+export default function EditBundlePage() {
   const fetcher = useFetcher();
-
   //////////Progressive Gifts/////////////////
 
   const [giftSections, setGiftSections] = useState([]);
@@ -215,22 +220,6 @@ export default function BundleView() {
     setShowVariantImg(!showVariantImag);
   };
 
-  //////////////////////////////////////////////
-
-  ///////////////////////////////////////////////
-  const formatFullDate = (date) => {
-    const d = new Date(date);
-
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    }).format(d);
-  };
-
   /////////////////////////////////////////////////////////////
 
   const [offerSections, setOfferSections] = useState([]);
@@ -246,8 +235,7 @@ export default function BundleView() {
   const [imageBorderRadius, setImageBorderRadius] = useState(10);
   const [chooseDefault, setChooseDefault] = useState(false);
 
-
-   useEffect(() => {
+  useEffect(() => {
     const defaultOffers = [
       {
         id: Math.random(),
@@ -296,9 +284,9 @@ export default function BundleView() {
       },
     ];
 
-    setOfferSections(defaultOffers); 
-  }, []); 
- 
+    setOfferSections(defaultOffers);
+  }, []);
+
   const addOfferSection = () => {
     const newOffer = {
       id: Math.random(),
@@ -509,13 +497,65 @@ export default function BundleView() {
 
   /////////////////handle submit///////////////////////////////
 
+  //////////////////////////////////////////////
+  // const metaId = useParams();
+  const loaderData = useLoaderData();
+  const metaIds = useParams();
+  const metaIdss = metaIds.id;
+  const metaId = `gid://shopify/Metaobject/${metaIdss}`;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loaderData && loaderData.data && loaderData.data.length > 0) {
+      const bundleData = loaderData.data.find((item) => {
+        console.log("----------------------------------------------");
+        console.log("item.id:", item.id);
+        console.log("metaId:", metaId);
+        console.log("----------------------------------------------");
+
+        return String(item.id) === String(metaId);
+      });
+
+      if (bundleData) {
+        console.log("Found bundleData:", bundleData);
+        console.log("bundleData.data:", bundleData.data);
+
+        setShowVariantSelection(bundleData.data.showVariantSelection);
+        setShowVariantImg(bundleData.data.showVariantImag);
+        setVariantImagSizeValue(bundleData.data.variantImagSizeValue);
+        setVariantImagRadiusValue(bundleData.data.variantImagRadiusValue);
+        setComparePrice(bundleData.data.comparePrice);
+        setBundleName(bundleData.data.name || "");
+        setTitle(bundleData.data.data.title || "Bundle & Save");
+        setProducts(bundleData.data.data.resource || []);
+      } else {
+        console.log("No bundle data found with the given metaId");
+      }
+    }
+  }, [loaderData, metaId]);
+
+  ///////////////////////////////////////////////
+  const formatFullDate = (date) => {
+    const d = new Date(date);
+
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+  };
+
+  /////////////////handle submit///////////////////////////////
+
   const handleSubmit = async () => {
     const createAt = formatFullDate(new Date());
 
     const data = {
       name: bundleName,
-      devBorder: devBorder,
-      selectedImage: selectedImage,
+
       showVariantSelection: showVariantSelection,
       variantImagSizeValue: variantImagSizeValue,
       variantImagRadiusValue: variantImagRadiusValue,
@@ -540,7 +580,8 @@ export default function BundleView() {
           name: bundleName,
           data: JSON.stringify(data),
           create_at: createAt,
-          type: "create",
+          metaobjectId: metaId,
+          type: "update",
         },
         { method: "POST" },
       );
@@ -548,10 +589,11 @@ export default function BundleView() {
       setBundleName("");
       setTitle("");
       setProducts([]);
-      setSuccessMessage("Data submitted successfully!");
+      setSuccessMessage("Data updated successfully!");
 
       setTimeout(() => {
         setSuccessMessage("");
+        navigate("/app/");
       }, 3000);
     } catch (error) {
       console.error("Submission failed", error);
@@ -559,6 +601,7 @@ export default function BundleView() {
   };
 
   /////////////////////////////////////////
+
   //////////////////////////////////////////////////////////////////////
 
   return (
@@ -605,186 +648,175 @@ export default function BundleView() {
                   {/* Trigger */}
                   <s-section>
                     <s-stack gap="small-300">
-                      <s-stack
-                        direction="inline"
-                        gap="small-300"
-                        onClick={() => handleToggle(0)}
-                      >
+                      <s-stack direction="inline" gap="small-300">
                         <s-icon type="settings" />
                         <s-heading>Trigger</s-heading>
                         <s-icon type="chevron-down" />
                       </s-stack>
-                      {activeIndex.includes(0) && (
-                        <s-stack gap="base">
+
+                      <s-stack gap="base">
+                        <s-stack
+                          direction="inline"
+                          gap="small-300"
+                          justifyContent="center"
+                        >
+                          <s-box InlineSize="245px">
+                            <s-text-field
+                              label="Bundle name"
+                              value={bundleName}
+                              onChange={(e) => {
+                                setBundleName(e.target.value);
+                              }}
+                            />
+                            <s-text type="small">
+                              Customer wont see it,But it will be the
+                              discount/bundle name.
+                            </s-text>
+                          </s-box>
+                          <s-box InlineSize="245px">
+                            <s-text-field
+                              label="Bundle title"
+                              value={title}
+                              onChange={(e) => {
+                                setTitle(e.target.value);
+                              }}
+                            />
+                          </s-box>
+                        </s-stack>
+                        <s-stack gap="small-300">
                           <s-stack
                             direction="inline"
-                            gap="small-300"
-                            justifyContent="center"
+                            gap="base"
+                            alignItems="center"
                           >
-                            <s-box InlineSize="245px">
-                              <s-text-field
-                                label="Bundle name"
-                                value={bundleName}
-                                onChange={(e) => {
-                                  setBundleName(e.target.value);
-                                }}
-                              />
-                              <s-text type="small">
-                                Customer wont see it,But it will be the
-                                discount/bundle name.
-                              </s-text>
+                            <s-box inlineSize="350px">
+                              <s-select label="Trigger">
+                                <s-option>specific collection</s-option>
+                                <s-option>specific products</s-option>
+                              </s-select>
                             </s-box>
-                            <s-box InlineSize="245px">
-                              <s-text-field
-                                label="Bundle title"
-                                value={title}
-                                onChange={(e) => {
-                                  setTitle(e.target.value);
-                                }}
-                              />
+                            <s-box paddingBlockStart="base">
+                              <s-button onClick={handleProduct}>brows</s-button>
                             </s-box>
                           </s-stack>
-                          <s-stack gap="small-300">
+                          {products.length > 0 && (
+                            <s-stack
+                              border="base"
+                              borderRadius="base"
+                              padding="base"
+                            >
+                              {products.map((product) => (
+                                <s-stack
+                                  key={product.id}
+                                  direction="inline"
+                                  gap="base"
+                                  justifyContent="space-between"
+                                >
+                                  <s-stack direction="inline" gap="base">
+                                    <s-box inlineSize="50px" blockSize="50px">
+                                      <s-image
+                                        src={
+                                          product.images && product.images[0]
+                                            ? product.images[0].originalSrc
+                                            : ""
+                                        }
+                                        alt={product.title}
+                                        aspectRatio="1/0.5"
+                                        objectFit="cover"
+                                      />
+                                    </s-box>
+                                    <s-box>
+                                      <s-text>{product.title}</s-text>
+                                      <s-paragraph>
+                                        {product.publishedAt}
+                                      </s-paragraph>
+                                    </s-box>
+                                  </s-stack>
+
+                                  <s-box>
+                                    <s-icon
+                                      type="x"
+                                      onClick={() => removeProduct(product.id)}
+                                    />
+                                  </s-box>
+                                </s-stack>
+                              ))}
+                            </s-stack>
+                          )}
+                          <s-box>
+                            <s-checkbox
+                              checked={showVariantSelection}
+                              onChange={handleVariantCheckboxChange}
+                              label="Show variant selection"
+                            />
+                          </s-box>
+                          {showVariantSelection && (
                             <s-stack
                               direction="inline"
-                              gap="base"
+                              justifyContent="space-between"
                               alignItems="center"
                             >
-                              <s-box inlineSize="350px">
-                                <s-select label="Trigger">
-                                  <s-option>specific collection</s-option>
-                                  <s-option>specific products</s-option>
-                                </s-select>
+                              <s-box>
+                                <s-checkbox
+                                  label="Display variant image"
+                                  checked={showVariantImag}
+                                  onChange={handleShowVariantImg}
+                                />
                               </s-box>
-                              <s-box paddingBlockStart="base">
-                                <s-button onClick={handleProduct}>
-                                  brows
-                                </s-button>
-                              </s-box>
+
+                              {showVariantImag && (
+                                <s-stack
+                                  direction="inline"
+                                  justifyContent="space-between"
+                                >
+                                  <s-box InlineSize="170px">
+                                    <s-text>
+                                      Size ({variantImagSizeValue}px)
+                                    </s-text>
+                                    <input
+                                      style={{ width: "100%" }}
+                                      type="range"
+                                      min="0"
+                                      max="100"
+                                      step="1"
+                                      value={variantImagSizeValue}
+                                      onChange={(e) => {
+                                        setVariantImagSizeValue(e.target.value);
+                                      }}
+                                    />
+                                  </s-box>
+                                  <s-box inlineSize="170px">
+                                    <s-text>
+                                      Radius ({variantImagRadiusValue}px)
+                                    </s-text>
+                                    <input
+                                      style={{ width: "100%" }}
+                                      type="range"
+                                      min="0"
+                                      max="100"
+                                      step="1"
+                                      value={variantImagRadiusValue}
+                                      onChange={(e) => {
+                                        setVariantImagRadiusValue(
+                                          e.target.value,
+                                        );
+                                      }}
+                                    />
+                                  </s-box>
+                                </s-stack>
+                              )}
                             </s-stack>
-                            {products.length > 0 && (
-                              <s-stack
-                                border="base"
-                                borderRadius="base"
-                                padding="base"
-                              >
-                                {products.map((product) => (
-                                  <s-stack
-                                    key={product.id}
-                                    direction="inline"
-                                    gap="base"
-                                    justifyContent="space-between"
-                                  >
-                                    <s-stack direction="inline" gap="base">
-                                      <s-box inlineSize="50px" blockSize="50px">
-                                        <s-image
-                                          src={
-                                            product.images && product.images[0]
-                                              ? product.images[0].originalSrc
-                                              : ""
-                                          }
-                                          alt={product.title}
-                                          aspectRatio="1/0.5"
-                                          objectFit="cover"
-                                        />
-                                      </s-box>
-                                      <s-box>
-                                        <s-text>{product.title}</s-text>
-                                        <s-paragraph>
-                                          {product.publishedAt}
-                                        </s-paragraph>
-                                      </s-box>
-                                    </s-stack>
+                          )}
 
-                                    <s-box>
-                                      <s-icon
-                                        type="x"
-                                        onClick={() =>
-                                          removeProduct(product.id)
-                                        }
-                                      />
-                                    </s-box>
-                                  </s-stack>
-                                ))}
-                              </s-stack>
-                            )}
-                            <s-box>
-                              <s-checkbox
-                                checked={showVariantSelection}
-                                onChange={handleVariantCheckboxChange}
-                                label="Show variant selection"
-                              />
-                            </s-box>
-                            {showVariantSelection && (
-                              <s-stack
-                                direction="inline"
-                                justifyContent="space-between"
-                                alignItems="center"
-                              >
-                                <s-box>
-                                  <s-checkbox
-                                    label="Display variant image"
-                                    checked={showVariantImag}
-                                    onChange={handleShowVariantImg}
-                                  />
-                                </s-box>
-
-                                {showVariantImag && (
-                                  <s-stack
-                                    direction="inline"
-                                    justifyContent="space-between"
-                                  >
-                                    <s-box InlineSize="170px">
-                                      <s-text>
-                                        Size ({variantImagSizeValue}px)
-                                      </s-text>
-                                      <input
-                                        style={{ width: "100%" }}
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        step="1"
-                                        value={variantImagSizeValue}
-                                        onChange={(e) => {
-                                          setVariantImagSizeValue(
-                                            e.target.value,
-                                          );
-                                        }}
-                                      />
-                                    </s-box>
-                                    <s-box inlineSize="170px">
-                                      <s-text>
-                                        Radius ({variantImagRadiusValue}px)
-                                      </s-text>
-                                      <input
-                                        style={{ width: "100%" }}
-                                        type="range"
-                                        min="0"
-                                        max="100"
-                                        step="1"
-                                        value={variantImagRadiusValue}
-                                        onChange={(e) => {
-                                          setVariantImagRadiusValue(
-                                            e.target.value,
-                                          );
-                                        }}
-                                      />
-                                    </s-box>
-                                  </s-stack>
-                                )}
-                              </s-stack>
-                            )}
-
-                            <s-box>
-                              <s-checkbox
-                                label="Compare price"
-                                checked={comparePrice}
-                                onChange={handleComparePrice}
-                              />
-                            </s-box>
-                          </s-stack>
+                          <s-box>
+                            <s-checkbox
+                              label="Compare price"
+                              checked={comparePrice}
+                              onChange={handleComparePrice}
+                            />
+                          </s-box>
                         </s-stack>
-                      )}
+                      </s-stack>
                     </s-stack>
                     {successMessage && (
                       <div
