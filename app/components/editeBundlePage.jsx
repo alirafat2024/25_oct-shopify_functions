@@ -252,36 +252,6 @@ export default function EditBundlePage() {
         upsellProductdd: [],
         giftProductsd: [],
       },
-      {
-        id: Math.random(),
-        titleOffer: "Buy 2",
-        subtitleOffer: "5% OFF",
-        defaultSelected,
-        insideBadgeText: "Best Offer",
-        outsideBadgeText: "Best seller",
-        discountType: "",
-        quantity: 1,
-        displayProductImage: true,
-        imageSize: " ",
-        imageBorderRadius: 10,
-        upsellProductdd: [],
-        giftProductsd: [],
-      },
-      {
-        id: Math.random(),
-        titleOffer: "Buy 3",
-        subtitleOffer: "5% OFF",
-        defaultSelected,
-        insideBadgeText: "Best Offer",
-        outsideBadgeText: "Best seller",
-        discountType: "",
-        quantity: 1,
-        displayProductImage: true,
-        imageSize: "",
-        imageBorderRadius: 10,
-        upsellProductdd: [],
-        giftProductsd: [],
-      },
     ];
 
     setOfferSections(defaultOffers);
@@ -520,14 +490,78 @@ export default function EditBundlePage() {
         console.log("Found bundleData:", bundleData);
         console.log("bundleData.data:", bundleData.data);
 
-        setShowVariantSelection(bundleData.data.data.showVariantSelection);
-        setShowVariantImg(bundleData.data.data.showVariantImag);
-        setVariantImagSizeValue(bundleData.data.data.variantImagSizeValue);
-        setVariantImagRadiusValue(bundleData.data.data.variantImagRadiusValue);
-        setComparePrice(bundleData.data.data.comparePrice);
-        setBundleName(bundleData.data.name || "");
-        setTitle(bundleData.data.data.title || "Bundle & Save");
-        setProducts(bundleData.data.data.resource || []);
+        setShowVariantSelection(
+          bundleData?.data?.data?.showVariantSelection || false,
+        );
+        setShowVariantImg(bundleData?.data?.data?.showVariantImag || false);
+        setVariantImagSizeValue(
+          bundleData?.data?.data?.variantImagSizeValue || 2,
+        );
+        setVariantImagRadiusValue(
+          bundleData?.data?.data?.variantImagRadiusValue || 2,
+        );
+        setComparePrice(bundleData?.data?.data?.comparePrice || false);
+        setBundleName(bundleData?.data?.name || "");
+        setTitle(bundleData?.data?.data?.title || "Bundle & Save");
+        setProducts(bundleData?.data?.data?.resource || []);
+        setGiftSections(bundleData?.data?.data?.giftSections || []);
+        setAddUpsellProductSections(
+          bundleData?.data?.data?.addUpsellProductSections || [],
+        );
+        setAddGiftProductSections(
+          bundleData?.data?.data?.addGiftProductSections || [],
+        );
+        setOfferSections(bundleData?.data?.data?.offerSections || []);
+
+        setDevBorder(bundleData?.data?.data?.devBorder || 5);
+        setSelectedImage(bundleData?.data?.data?.selectedImage || "horizontal");
+        setTitleColor(bundleData?.data?.data?.titleColor || "#000000");
+        setLineColor(bundleData?.data?.data?.lineleColor || "#AAF0FB");
+        setCardBgColor(bundleData?.data?.data?.cardBgColor || "#FFFFFF");
+        setSelectedCardBgColor(
+          bundleData?.data?.data?.selectedCardBgColor || "#AAF0FB",
+        );
+        setCardTitleColor(bundleData?.data?.data?.cardTitleColor || "#000000");
+        setCardSubtitleColor(
+          bundleData?.data?.data?.cardSubtitleColor || "#7E5050",
+        );
+        setPriceColor(bundleData?.data?.data?.priceColor || "#000000");
+        setComparePrice(bundleData?.data?.data?.comparePrice || false);
+        setBorderColor(bundleData?.data?.data?.borderColor || "#CCCCCC");
+        setAtcButtonText(
+          bundleData?.data?.data?.atcButtonText || "Add To Cart",
+        );
+        setTextColor(bundleData?.data?.data?.textColor || "#FFFFFF");
+        setBackgroundColor(
+          bundleData?.data?.data?.backgroundColor || "#000000",
+        );
+        setAtcButtonBackgroundColor(
+          bundleData?.data?.data?.atcButtonBackgroundColor || "#000000",
+        );
+        setAtcButtonTextColor(
+          bundleData?.data?.data?.atcButtonTextColor || "#FFFFFF",
+        );
+        setPaddingButton(bundleData?.data?.data?.paddingButton || 10);
+        setOutsideTextColor(
+          bundleData?.data?.data?.outsideTextColor || "#747474",
+        );
+        setOutsideBackgroundColor(
+          bundleData?.data?.data?.outsideBackgroundColor || "#FFF100",
+        );
+        setBorderRadiusButton(bundleData?.data?.data?.borderRadiusButton || 10);
+        setUpsellBackgroundColor(
+          bundleData?.data?.data?.upsellBackgroundColor || "#E5E7EB",
+        );
+        setFontSettings(
+          bundleData?.data?.data?.fontSettings || {
+            mainTitle: { fontSize: 24, fontStyle: "700" },
+            cardTitle: { fontSize: 19.2, fontStyle: "500" },
+            cardSubtitle: { fontSize: 16, fontStyle: "400" },
+            insideBadge: { fontSize: 14, fontStyle: "400" },
+            outsideBadge: { fontSize: 14, fontStyle: "400" },
+            atcButton: { fontSize: 16, fontStyle: "400" },
+          },
+        );
       } else {
         console.log("No bundle data found with the given metaId");
       }
@@ -586,9 +620,6 @@ export default function EditBundlePage() {
         { method: "POST" },
       );
 
-      setBundleName("");
-      setTitle("");
-      setProducts([]);
       setSuccessMessage("Data updated successfully!");
 
       setTimeout(() => {
@@ -612,7 +643,7 @@ export default function EditBundlePage() {
           onSubmit={handleSubmit}
           onReset="handleDiscord(event)"
         >
-          <s-box>
+          <s-box paddingBlockEnd="base">
             <s-stack
               direction="inline"
               gap="base"
@@ -634,7 +665,7 @@ export default function EditBundlePage() {
                 <s-badge tone="success">New</s-badge>
               </s-stack>
             </s-stack>
-            <s-heading>Create a new bundle for your customers.</s-heading>
+            <s-heading>Update bundle </s-heading>
           </s-box>
 
           <s-query-container>
@@ -1557,6 +1588,8 @@ export default function EditBundlePage() {
                   style={{
                     position: "fixed",
                     maxWidth: "450px",
+                    maxHeight: "auto",
+                    overflow:"auto"
                   }}
                 >
                   <s-section>
@@ -1762,7 +1795,7 @@ export default function EditBundlePage() {
 
                                   {showVariantSelection && (
                                     <div>
-                                      {Array.from({ ength: index + 1  }).map(
+                                      {Array.from({ length: index + 1 }).map(
                                         (_, variantIdx) => (
                                           <s-stack
                                             direction="inline"

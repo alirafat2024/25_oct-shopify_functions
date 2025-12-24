@@ -246,8 +246,7 @@ export default function BundleView() {
   const [imageBorderRadius, setImageBorderRadius] = useState(10);
   const [chooseDefault, setChooseDefault] = useState(false);
 
-
-   useEffect(() => {
+  useEffect(() => {
     const defaultOffers = [
       {
         id: Math.random(),
@@ -296,9 +295,9 @@ export default function BundleView() {
       },
     ];
 
-    setOfferSections(defaultOffers); 
-  }, []); 
- 
+    setOfferSections(defaultOffers);
+  }, []);
+
   const addOfferSection = () => {
     const newOffer = {
       id: Math.random(),
@@ -522,6 +521,30 @@ export default function BundleView() {
       comparePrice: comparePrice,
       title: title,
       resource: products,
+      giftSections: giftSections,
+      offerSections: offerSections,
+      addUpsellProductSections: addUpsellProductSections,
+      addGiftProductSections: addGiftProductSections,
+      titleColor: titleColor,
+      lineleColor: lineleColor,
+      cardBgColor: cardBgColor,
+      selectedCardBgColor: selectedCardBgColor,
+      cardTitleColor: cardTitleColor,
+      cardSubtitleColor: cardSubtitleColor,
+      priceColor: priceColor,
+      comparePriceColor: comparePriceColor,
+      borderColor: borderColor,
+      atcButtonText: atcButtonText,
+      textColor: textColor,
+      backgroundColor: backgroundColor,
+      atcButtonBackgroundColor: atcButtonBackgroundColor,
+      atcButtonTextColor: atcButtonTextColor,
+      paddingButton: paddingButton,
+      outsideTextColor: outsideTextColor,
+      outsideBackgroundColor: outsideBackgroundColor,
+      borderRadiusButton: borderRadiusButton,
+      upsellBackgroundColor: upsellBackgroundColor,
+      fontSettings: fontSettings,
     };
 
     if (
@@ -548,6 +571,17 @@ export default function BundleView() {
       setBundleName("");
       setTitle("");
       setProducts([]);
+      setDevBorder("");
+      setSelectedImage(null);
+      setShowVariantSelection(false);
+      setVariantImagSizeValue("");
+      setVariantImagRadiusValue("");
+      setComparePrice("");
+      setGiftSections([]);
+      setOfferSections([]);
+      setAddUpsellProductSections([]);
+      setAddGiftProductSections([]);
+
       setSuccessMessage("Data submitted successfully!");
 
       setTimeout(() => {
@@ -559,6 +593,7 @@ export default function BundleView() {
   };
 
   /////////////////////////////////////////
+
   //////////////////////////////////////////////////////////////////////
 
   return (
@@ -569,7 +604,7 @@ export default function BundleView() {
           onSubmit={handleSubmit}
           onReset="handleDiscord(event)"
         >
-          <s-box>
+          <s-box paddingBlockEnd="base">
             <s-stack
               direction="inline"
               gap="base"
@@ -1524,7 +1559,8 @@ export default function BundleView() {
                 <div
                   style={{
                     position: "fixed",
-                    maxWidth: "450px",
+                    top: "0px",
+                    width: "450px",
                   }}
                 >
                   <s-section>
@@ -1636,15 +1672,27 @@ export default function BundleView() {
                                       gap="base"
                                       alignItems="center"
                                     >
-                                      <s-choice-list
-                                        onChange={(e) => {
-                                          setChooseDefault(
-                                            e.target.currentTarget.values,
-                                          );
+                                      <input
+                                        type="radio"
+                                        name="bundle"
+                                        onChange={(e)=>{
+                                          setChooseDefault(e.target.value)
                                         }}
-                                      >
-                                        <s-choice value={chooseDefault} />
-                                      </s-choice-list>
+                                        readOnly
+                                        checked={chooseDefault}
+                                        style={{
+                                          width: "20px",
+                                          height: "20px",
+                                          borderWidth: "2px",
+                                         
+                                          borderRadius: "9999px",
+                                          transition:
+                                            "all 150ms cubic-bezier(0.4, 0, 0.2, 1)",
+                                          boxShadow: "none",
+                                          cursor: "pointer",
+                                        
+                                        }}
+                                      />
 
                                       <s-box>
                                         <s-stack
@@ -1729,46 +1777,53 @@ export default function BundleView() {
                                   </s-stack>
 
                                   {showVariantSelection && (
-                                    <s-stack
-                                      direction="inline"
-                                      gap="small-300"
-                                      alignItems="center"
-                                    >
-                                      <s-box>
-                                        <s-button variant="primary">
-                                          #1
-                                        </s-button>
-                                      </s-box>
-                                      {showVariantImag && (
-                                        <div
-                                          style={{
-                                            color: "gray",
-                                            backgroundColor:
-                                              "rgba(241, 241, 241, 1)",
-                                            padding: `${variantImagSizeValue}px`,
-                                            margin: "0px",
-                                            borderRadius: `${variantImagRadiusValue}px`,
-                                            alignItems: "center",
-                                            textAlign: "center",
-                                          }}
-                                        >
-                                          <FiBox
-                                            style={{
-                                              width: "15px",
-                                              height: "15px",
-                                            }}
-                                          />
-                                        </div>
+                                    <div>
+                                      {Array.from({ length: index + 1 }).map(
+                                        (_, variantIdx) => (
+                                          <s-stack
+                                            direction="inline"
+                                            gap="small-300"
+                                            alignItems="center"
+                                            key={variantIdx}
+                                          >
+                                            <s-box>
+                                              <s-button variant="primary">
+                                                #{index + 1}
+                                              </s-button>
+                                            </s-box>
+                                            {showVariantImag && (
+                                              <div
+                                                style={{
+                                                  color: "gray",
+                                                  backgroundColor:
+                                                    "rgba(241, 241, 241, 1)",
+                                                  padding: `${variantImagSizeValue}px`,
+                                                  margin: "0px",
+                                                  borderRadius: `${variantImagRadiusValue}px`,
+                                                  alignItems: "center",
+                                                  textAlign: "center",
+                                                }}
+                                              >
+                                                <FiBox
+                                                  style={{
+                                                    width: "15px",
+                                                    height: "15px",
+                                                  }}
+                                                />
+                                              </div>
+                                            )}
+                                            <s-box inlineSize="100px">
+                                              <s-select>
+                                                <s-option>$10</s-option>
+                                                <s-option>$25</s-option>
+                                                <s-option>$50</s-option>
+                                                <s-option>$100</s-option>
+                                              </s-select>
+                                            </s-box>
+                                          </s-stack>
+                                        ),
                                       )}
-                                      <s-box inlineSize="100px">
-                                        <s-select>
-                                          <s-option>$10</s-option>
-                                          <s-option>$25</s-option>
-                                          <s-option>$50</s-option>
-                                          <s-option>$100</s-option>
-                                        </s-select>
-                                      </s-box>
-                                    </s-stack>
+                                    </div>
                                   )}
 
                                   {addSection.upsellProductdd &&
