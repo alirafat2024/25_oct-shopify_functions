@@ -679,6 +679,7 @@ export default function BundleView() {
                               />
                             </s-box>
                           </s-stack>
+
                           <s-stack gap="small-300">
                             <s-stack
                               direction="inline"
@@ -817,6 +818,7 @@ export default function BundleView() {
                                 onChange={handleComparePrice}
                               />
                             </s-box>
+                          
                           </s-stack>
                         </s-stack>
                       )}
